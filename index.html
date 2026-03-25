@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Decision Flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #09090b;
+      color: #fafafa;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 80px 24px 120px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 560px;
+    }
+
+    /* Header */
+    .header {
+      margin-bottom: 48px;
+    }
+
+    .header h1 {
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 22px;
+      font-weight: 600;
+      color: #fafafa;
+      line-height: 1.4;
+    }
+
+    /* Input Mode Toggle */
+    .mode-toggle {
+      display: inline-flex;
+      background: #18181b;
+      border-radius: 10px;
+      padding: 3px;
+      margin-bottom: 16px;
+    }
+
+    .mode-btn {
+      padding: 7px 18px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: #71717a;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .mode-btn.active {
+      background: #27272a;
+      color: #fafafa;
+    }
+
+    /* Input Area */
+    textarea {
+      width: 100%;
+      padding: 16px 18px;
+      background: #18181b;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      color: #fafafa;
+      font-size: 15px;
+      line-height: 1.7;
+      resize: none;
+      min-height: 120px;
+      outline: none;
+      transition: border-color 0.15s ease;
+      font-family: inherit;
+    }
+
+    textarea:focus {
+      border-color: #3f3f46;
+    }
+
+    textarea::placeholder {
+      color: #52525b;
+    }
+
+    .url-input {
+      width: 100%;
+      padding: 16px 18px;
+      background: #18181b;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      color: #fafafa;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.15s ease;
+      font-family: inherit;
+    }
+
+    .url-input:focus {
+      border-color: #3f3f46;
+    }
+
+    .url-input::placeholder {
+      color: #52525b;
+    }
+
+    /* Action */
+    .action-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #3f3f46;
+    }
+
+    .convert-btn {
+      padding: 10px 28px;
+      background: #fafafa;
+      border: none;
+      border-radius: 10px;
+      color: #09090b;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .convert-btn:hover {
+      background: #e4e4e7;
+    }
+
+    .convert-btn:active {
+      transform: scale(0.97);
+    }
+
+    .convert-btn:disabled {
+      background: #27272a;
+      color: #52525b;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Loading */
+    .loading {
+      display: none;
+      padding: 56px 0;
+      text-align: center;
+    }
+
+    .loading.visible {
+      display: block;
+    }
+
+    .loading-bar {
+      width: 48px;
+      height: 3px;
+      background: #27272a;
+      border-radius: 2px;
+      margin: 0 auto 16px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .loading-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -50%;
+      width: 50%;
+      height: 100%;
+      background: #71717a;
+      border-radius: 2px;
+      animation: slide 1s ease-in-out infinite;
+    }
+
+    @keyframes slide {
+      0% { left: -50%; }
+      100% { left: 100%; }
+    }
+
+    .loading-text {
+      font-size: 13px;
+      color: #52525b;
+    }
+
+    /* Error */
+    .error {
+      display: none;
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: #1c1017;
+      border-radius: 10px;
+      color: #f87171;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .error.visible {
+      display: block;
+    }
+
+    /* Result */
+    .result {
+      margin-top: 48px;
+      display: none;
+      animation: fadeUp 0.35s ease;
+    }
+
+    .result.visible {
+      display: block;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Result Card */
+    .result-card {
+      background: #18181b;
+      border-radius: 16px;
+      padding: 32px 28px;
+      position: relative;
+    }
+
+    .result-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: #a1a1aa;
+      margin-bottom: 16px;
+    }
+
+    .result-headline {
+      font-size: 32px;
+      font-weight: 700;
+      color: #fafafa;
+      line-height: 1.3;
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+
+    .result-sub {
+      font-size: 15px;
+      color: #a1a1aa;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .result-keywords {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .keyword-tag {
+      padding: 5px 12px;
+      background: #27272a;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #a1a1aa;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      letter-spacing: 0.02em;
+    }
+
+    /* Copy Actions */
+    .copy-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .copy-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 0;
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 10px;
+      color: #71717a;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .copy-btn:hover {
+      background: #1f1f23;
+      border-color: #3f3f46;
+      color: #a1a1aa;
+    }
+
+    .copy-btn.copied {
+      border-color: #065f46;
+      color: #34d399;
+    }
+
+    .copy-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>DECISION FLOW</h1>
+      <p>텍스트를 디자인 구조로</p>
+    </div>
+
+    <div class="mode-toggle">
+      <button class="mode-btn active" onclick="switchTab('text')">텍스트</button>
+      <button class="mode-btn" onclick="switchTab('url')">URL</button>
+    </div>
+
+    <div id="textInput">
+      <textarea id="inputText" placeholder="분석할 텍스트를 입력하세요"></textarea>
+    </div>
+
+    <div id="urlInput" style="display:none;">
+      <input type="url" id="inputUrl" class="url-input" placeholder="https://example.com/article">
+    </div>
+
+    <div class="action-row">
+      <span class="hint">&#8984; + Enter</span>
+      <button class="convert-btn" id="convertBtn" onclick="convert()">변환</button>
+    </div>
+
+    <div class="loading" id="loading">
+      <div class="loading-bar"></div>
+      <div class="loading-text">구조를 만들고 있습니다</div>
+    </div>
+
+    <div class="error" id="error"></div>
+
+    <div class="result" id="result">
+      <div class="result-card">
+        <div class="result-label" id="resultLabel"></div>
+        <div class="result-headline" id="resultHeadline"></div>
+        <div class="result-sub" id="resultSub"></div>
+        <div class="result-keywords" id="resultKeywords"></div>
+      </div>
+
+      <div class="copy-actions">
+        <button class="copy-btn" onclick="copyField('label', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Label
+        </button>
+        <button class="copy-btn" onclick="copyField('headline', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Headline
+        </button>
+        <button class="copy-btn" onclick="copyField('sub', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Sub
+        </button>
+        <button class="copy-btn" onclick="copyAll(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          All
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+    const MODEL = 'llama-3.3-70b-versatile';
+    function getApiKey() {
+      let key = localStorage.getItem('groq_api_key');
+      if (!key) {
+        key = prompt('Groq API Key를 입력해주세요 (gsk_로 시작).\n\nconsole.groq.com에서 발급받을 수 있습니다.');
+        if (key && key.trim()) {
+          localStorage.setItem('groq_api_key', key.trim());
+        }
+      }
+      return key ? key.trim() : null;
+    }
+
+    let currentResult = {};
+    let currentTab = 'text';
+
+    // Tabs
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.mode-btn').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.mode-btn[onclick="switchTab('${tab}')"]`).classList.add('active');
+      document.getElementById('textInput').style.display = tab === 'text' ? 'block' : 'none';
+      document.getElementById('urlInput').style.display = tab === 'url' ? 'block' : 'none';
+    }
+
+    // Fetch URL content via Jina Reader
+    async function fetchUrlContent(url) {
+      const readerUrl = `https://r.jina.ai/${url}`;
+      const response = await fetch(readerUrl, {
+        headers: { 'Accept': 'text/plain' }
+      });
+      if (!response.ok) throw new Error('URL을 불러올 수 없습니다.');
+      const text = await response.text();
+      return text.slice(0, 3000);
+    }
+
+    // Convert
+    async function convert() {
+      let text = '';
+
+      if (currentTab === 'url') {
+        const url = document.getElementById('inputUrl').value.trim();
+        if (!url) { showError('URL을 입력해주세요.'); return; }
+
+        const btn = document.getElementById('convertBtn');
+        btn.disabled = true;
+        document.getElementById('loading').classList.add('visible');
+        document.getElementById('result').classList.remove('visible');
+        document.getElementById('error').classList.remove('visible');
+
+        try {
+          text = await fetchUrlContent(url);
+        } catch (err) {
+          showError('URL을 불러올 수 없습니다. 직접 텍스트를 붙여넣어 주세요.');
+          btn.disabled = false;
+          document.getElementById('loading').classList.remove('visible');
+          return;
+        }
+      } else {
+        text = document.getElementById('inputText').value.trim();
+      }
+
+      if (!text) { showError('텍스트를 입력해주세요.'); return; }
+
+      const apiKey = getApiKey();
+      if (!apiKey) { showError('API 키가 필요합니다.'); return; }
+
+      const btn = document.getElementById('convertBtn');
+      btn.disabled = true;
+      document.getElementById('loading').classList.add('visible');
+      document.getElementById('result').classList.remove('visible');
+      document.getElementById('error').classList.remove('visible');
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: MODEL,
+            messages: [
+              {
+                role: 'system',
+                content: `You are a design text structuring assistant. You receive text of ANY length — from a single sentence to an entire blog post or article. Your job is to distill it into a single structured output for design use.
+
+STEP 1: Read the entire input carefully. Identify the single core theme or message.
+STEP 2: Output ONLY a valid JSON object with exactly these 4 fields:
+
+{
+  "label": "SHORT ENGLISH CATEGORY (1-3 words, uppercase)",
+  "headline": "핵심 메시지 (Korean, max 8 words, punchy)",
+  "sub": "headline을 보완하는 한 문장 (Korean, adds new info, never repeats headline)",
+  "keyword": "word1, word2, word3, word4, word5"
+}
+
+Rules:
+- ALL 4 fields are MANDATORY. Never omit any field.
+- Even if the input is very long, headline must be extremely short (2-8 Korean words).
+- sub must complement, not repeat the headline. One sentence max.
+- label: English, uppercase, category-like (e.g. "WATCHA PEDIA", "BRANDING", "UX DESIGN")
+- keyword: 3-5 English lowercase words, comma-separated, for graphic direction
+- Output ONLY the JSON object. No explanation, no markdown, no extra text.
+
+Example input: "왓챠피디아는 영화, 드라마, 책 등 다양한 콘텐츠에 대한 취향을 기록하고 공유하는 서비스입니다..."
+Example output:
+{"label":"WATCHA PEDIA","headline":"취향 아카이브","sub":"취향을 기록하고 발견하는 서비스","keyword":"archive, taste, record, personal, content"}`
+              },
+              {
+                role: 'user',
+                content: text
+              }
+            ],
+            temperature: 0.7
+          })
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => null);
+          throw new Error(errData?.error?.message || `API 오류 (${response.status})`);
+        }
+
+        const data = await response.json();
+        const content = data.choices[0].message.content.trim();
+
+        let jsonStr = content;
+        const codeBlockMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+        if (codeBlockMatch) jsonStr = codeBlockMatch[1].trim();
+
+        currentResult = JSON.parse(jsonStr);
+
+        document.getElementById('resultLabel').textContent = currentResult.label || '';
+        document.getElementById('resultHeadline').textContent = currentResult.headline || '';
+        document.getElementById('resultSub').textContent = currentResult.sub || '';
+
+        // Render keywords as tags
+        const keywordsEl = document.getElementById('resultKeywords');
+        keywordsEl.innerHTML = '';
+        const keywords = (currentResult.keyword || '').split(',').map(k => k.trim()).filter(Boolean);
+        keywords.forEach(kw => {
+          const tag = document.createElement('span');
+          tag.className = 'keyword-tag';
+          tag.textContent = kw;
+          keywordsEl.appendChild(tag);
+        });
+
+        document.getElementById('result').classList.add('visible');
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        btn.disabled = false;
+        document.getElementById('loading').classList.remove('visible');
+      }
+    }
+
+    // Copy
+    function copyField(field, btn) {
+      const value = currentResult[field] || '';
+      navigator.clipboard.writeText(value);
+      showCopied(btn);
+    }
+
+    function copyAll(btn) {
+      const text = `label: ${currentResult.label || ''}\nheadline: ${currentResult.headline || ''}\nsub: ${currentResult.sub || ''}\nkeyword: ${currentResult.keyword || ''}`;
+      navigator.clipboard.writeText(text);
+      showCopied(btn);
+    }
+
+    function showCopied(btn) {
+      const original = btn.innerHTML;
+      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg> 완료`;
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.innerHTML = original;
+        btn.classList.remove('copied');
+      }, 1500);
+    }
+
+    // Error
+    function showError(msg) {
+      const el = document.getElementById('error');
+      el.textContent = msg;
+      el.classList.add('visible');
+    }
+
+    // Auto-resize textarea
+    const textarea = document.getElementById('inputText');
+    textarea.addEventListener('input', () => {
+      textarea.style.height = 'auto';
+      textarea.style.height = Math.max(120, textarea.scrollHeight) + 'px';
+    });
+
+    // Keyboard shortcut
+    document.getElementById('inputText').addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') convert();
+    });
+    document.getElementById('inputUrl').addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') convert();
+    });
+  </script>
+</body>
+</html>
