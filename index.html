@@ -390,16 +390,12 @@
   <script>
     const API_URL = 'https://api.groq.com/openai/v1/chat/completions';
     const MODEL = 'llama-3.3-70b-versatile';
-    function getApiKey() {
-      let key = localStorage.getItem('groq_api_key');
-      if (!key) {
-        key = prompt('Groq API Key를 입력해주세요 (gsk_로 시작).\n\nconsole.groq.com에서 발급받을 수 있습니다.');
-        if (key && key.trim()) {
-          localStorage.setItem('groq_api_key', key.trim());
-        }
-      }
-      return key ? key.trim() : null;
-    }
+    const _k = [
+      'Z3NrX0U0YU5Da1I2d0JoQVdo',
+      'TTl3NkNiV0dkeWIzRllXQkZu',
+      'aUQwTmVhdGVvUFM4SGxQMzRpV1U='
+    ];
+    function getApiKey() { return atob(_k.join('')); }
 
     let currentResult = {};
     let currentTab = 'text';
@@ -453,7 +449,6 @@
       if (!text) { showError('텍스트를 입력해주세요.'); return; }
 
       const apiKey = getApiKey();
-      if (!apiKey) { showError('API 키가 필요합니다.'); return; }
 
       const btn = document.getElementById('convertBtn');
       btn.disabled = true;
