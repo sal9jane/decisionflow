@@ -6,571 +6,568 @@
   <title>Decision Flow</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@700;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f7f5f2;
-      --surface: #ffffff;
-      --border: #e8e4df;
-      --border-strong: #d4cfc8;
-      --text-1: #1a1a1a;
-      --text-2: #6b6560;
-      --text-3: #a09890;
-      --accent: #d97706;
-      --accent-bg: #fef3c7;
-      --select: #2563eb;
-      --select-bg: #eff6ff;
-      --green: #16a34a;
-      --green-bg: #f0fdf4;
-      --red: #dc2626;
-      --font: 'Inter', 'Noto Sans KR', -apple-system, sans-serif;
-      --mono: 'JetBrains Mono', monospace;
-      --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-      --shadow-md: 0 4px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
-      --radius: 12px;
-      --radius-lg: 16px;
+      --white: #ffffff;
+      --black: #000000;
+      --gray-1: #111111;
+      --gray-2: #333333;
+      --gray-3: #666666;
+      --gray-4: #999999;
+      --gray-5: #cccccc;
+      --gray-6: #e5e5e5;
+      --gray-7: #f5f5f5;
+      --red: #ff0000;
+      --sans: 'IBM Plex Sans', 'Noto Sans KR', 'Helvetica Neue', Arial, sans-serif;
+      --serif: 'Noto Serif KR', Georgia, 'Times New Roman', serif;
+      --mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--text-1);
-      min-height: 100vh;
+      font-family: var(--sans);
+      background: var(--white);
+      color: var(--black);
       -webkit-font-smoothing: antialiased;
     }
 
-    .page {
-      max-width: 580px;
-      margin: 0 auto;
-      padding: 80px 24px 160px;
-    }
-
-    /* Header */
-    .header { margin-bottom: 48px; }
-
-    .header-brand {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text-1);
-      margin-bottom: 8px;
-      letter-spacing: -0.01em;
-    }
-
-    .header-desc {
-      font-size: 15px;
-      color: var(--text-2);
-      line-height: 1.5;
-    }
-
-    /* Steps */
-    .steps {
+    /* Navigation */
+    .nav {
       display: flex;
-      gap: 4px;
-      margin-bottom: 32px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 4px;
-      box-shadow: var(--shadow-sm);
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 40px;
+      border-bottom: 1px solid var(--black);
+    }
+
+    .nav-brand {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .nav-step {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--gray-4);
+    }
+
+    .nav-step strong {
+      color: var(--black);
+      font-weight: 500;
+    }
+
+    /* Main */
+    .main {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 80px 40px 160px;
+    }
+
+    /* Steps — minimal underline tabs */
+    .step-bar {
+      display: flex;
+      gap: 40px;
+      border-bottom: 1px solid var(--gray-6);
+      margin-bottom: 64px;
     }
 
     .step-tab {
-      flex: 1;
-      padding: 9px 0;
-      text-align: center;
+      padding-bottom: 14px;
       font-size: 13px;
       font-weight: 500;
-      color: var(--text-3);
-      border-radius: 7px;
-      cursor: default;
-      transition: all 0.2s;
+      color: var(--gray-5);
+      letter-spacing: 0.02em;
+      position: relative;
+      transition: color 0.2s;
     }
 
     .step-tab.active {
-      background: var(--text-1);
-      color: #fff;
-      font-weight: 600;
+      color: var(--black);
     }
 
-    .step-tab.done {
-      color: var(--text-2);
+    .step-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--black);
     }
 
-    /* Cards */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 28px;
-      box-shadow: var(--shadow);
-    }
-
-    .card + .card { margin-top: 12px; }
-
-    .card-header {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text-3);
-      margin-bottom: 20px;
-    }
+    .step-tab.done { color: var(--gray-4); }
 
     /* Panels */
     .panel { display: none; }
     .panel.active {
       display: block;
-      animation: fadeIn 0.3s ease;
+      animation: enter 0.25s ease;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+    @keyframes enter {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Typography */
+    .section-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gray-4);
+      margin-bottom: 32px;
     }
 
     /* Input */
-    .mode-row {
+    .toggle-row {
       display: flex;
-      gap: 2px;
-      background: var(--bg);
-      border-radius: 8px;
-      padding: 3px;
-      margin-bottom: 16px;
+      gap: 24px;
+      margin-bottom: 24px;
     }
 
-    .mode-btn {
-      flex: 1;
-      padding: 7px 0;
-      background: transparent;
+    .toggle-btn {
+      background: none;
       border: none;
-      border-radius: 6px;
       font-size: 13px;
       font-weight: 500;
-      color: var(--text-3);
+      color: var(--gray-5);
       cursor: pointer;
-      transition: all 0.15s;
-      font-family: var(--font);
+      padding: 0;
+      transition: color 0.15s;
+      font-family: var(--sans);
     }
 
-    .mode-btn.active {
-      background: var(--surface);
-      color: var(--text-1);
-      box-shadow: var(--shadow-sm);
-    }
+    .toggle-btn.active { color: var(--black); }
 
     textarea {
       width: 100%;
-      padding: 14px 16px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text-1);
-      font-size: 15px;
-      line-height: 1.7;
+      padding: 0;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--gray-6);
+      color: var(--black);
+      font-size: 18px;
+      line-height: 1.8;
       resize: none;
-      min-height: 120px;
+      min-height: 140px;
       outline: none;
-      font-family: var(--font);
-      transition: border-color 0.15s;
+      font-family: var(--sans);
+      transition: border-color 0.2s;
+      padding-bottom: 16px;
     }
 
-    textarea:focus { border-color: var(--border-strong); }
-    textarea::placeholder { color: var(--text-3); }
+    textarea:focus { border-color: var(--black); }
+    textarea::placeholder { color: var(--gray-5); }
 
     .url-input {
       width: 100%;
-      padding: 14px 16px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text-1);
+      padding: 0 0 16px;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--gray-6);
+      color: var(--black);
       font-family: var(--mono);
-      font-size: 13px;
+      font-size: 14px;
       outline: none;
-      transition: border-color 0.15s;
+      transition: border-color 0.2s;
     }
 
-    .url-input:focus { border-color: var(--border-strong); }
-    .url-input::placeholder { color: var(--text-3); }
+    .url-input:focus { border-color: var(--black); }
+    .url-input::placeholder { color: var(--gray-5); }
 
     /* Buttons */
-    .btn-row {
+    .action-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-top: 16px;
+      margin-top: 32px;
     }
 
     .hint {
-      font-size: 12px;
-      color: var(--text-3);
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--gray-5);
     }
 
-    .btn-primary {
-      padding: 10px 28px;
-      background: var(--text-1);
+    .btn {
+      padding: 12px 36px;
+      background: var(--black);
       border: none;
-      border-radius: 8px;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 600;
+      color: var(--white);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
       cursor: pointer;
-      font-family: var(--font);
-      transition: all 0.15s;
+      font-family: var(--sans);
+      transition: opacity 0.15s;
     }
 
-    .btn-primary:hover { background: #333; }
-    .btn-primary:active { transform: scale(0.98); }
-    .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+    .btn:hover { opacity: 0.7; }
+    .btn:disabled { opacity: 0.15; cursor: not-allowed; }
 
     .btn-outline {
-      padding: 10px 20px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text-2);
+      padding: 12px 24px;
+      background: transparent;
+      border: 1px solid var(--gray-6);
+      color: var(--gray-3);
       font-size: 13px;
       font-weight: 500;
       cursor: pointer;
-      font-family: var(--font);
+      font-family: var(--sans);
       transition: all 0.15s;
-      box-shadow: var(--shadow-sm);
     }
 
-    .btn-outline:hover { border-color: var(--border-strong); color: var(--text-1); }
+    .btn-outline:hover { border-color: var(--black); color: var(--black); }
 
     /* Loading */
-    .loading { display: none; padding: 48px 0; text-align: center; }
+    .loading { display: none; padding: 80px 0; text-align: center; }
     .loading.visible { display: block; }
 
-    .loader {
-      width: 24px; height: 24px;
-      border: 2.5px solid var(--border);
-      border-top-color: var(--text-2);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      margin: 0 auto 14px;
+    .loading-text {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gray-4);
+      animation: fade 1.5s ease-in-out infinite;
     }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .loading-text { font-size: 13px; color: var(--text-3); }
+    @keyframes fade {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
 
     /* Error */
     .error {
       display: none;
-      margin-top: 12px;
-      padding: 12px 16px;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      border-radius: 10px;
-      color: var(--red);
+      margin-top: 24px;
       font-size: 13px;
+      color: var(--red);
+      font-family: var(--mono);
     }
     .error.visible { display: block; }
 
-    /* Structure Result */
-    .struct-label {
-      display: inline-block;
-      padding: 4px 10px;
-      background: var(--bg);
-      border-radius: 6px;
+    /* Structure result */
+    .result-structure {
+      padding: 64px 0;
+      border-bottom: 1px solid var(--gray-6);
+    }
+
+    .r-label {
+      font-family: var(--mono);
       font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      color: var(--accent);
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--gray-4);
+      margin-bottom: 32px;
+    }
+
+    .r-headline {
+      font-family: var(--serif);
+      font-size: 48px;
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      color: var(--black);
       margin-bottom: 16px;
     }
 
-    .struct-headline {
-      font-size: 32px;
-      font-weight: 800;
-      line-height: 1.2;
-      letter-spacing: -0.025em;
-      color: var(--text-1);
-      margin-bottom: 10px;
-      font-family: 'Noto Sans KR', var(--font);
-    }
-
-    .struct-sub {
-      font-size: 16px;
-      color: var(--text-2);
+    .r-sub {
+      font-size: 18px;
+      font-weight: 400;
+      color: var(--gray-3);
       line-height: 1.65;
     }
 
-    /* Strategy — property rows */
-    .prop-list { list-style: none; }
-
-    .prop-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 13px 0;
-      border-bottom: 1px solid var(--border);
+    /* Strategy — table */
+    .strategy-table {
+      width: 100%;
+      border-collapse: collapse;
     }
 
-    .prop-item:last-child { border-bottom: none; }
-
-    .prop-key {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-2);
+    .strategy-table tr {
+      border-bottom: 1px solid var(--gray-6);
     }
 
-    .prop-val {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-1);
-    }
+    .strategy-table tr:last-child { border-bottom: none; }
 
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 3px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .badge-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-    }
-
-    .badge-blue { background: var(--select-bg); color: var(--select); }
-    .badge-blue .badge-dot { background: var(--select); }
-    .badge-amber { background: var(--accent-bg); color: var(--accent); }
-    .badge-amber .badge-dot { background: var(--accent); }
-    .badge-green { background: var(--green-bg); color: var(--green); }
-    .badge-green .badge-dot { background: var(--green); }
-    .badge-red { background: #fef2f2; color: var(--red); }
-    .badge-red .badge-dot { background: var(--red); }
-    .badge-neutral { background: var(--bg); color: var(--text-2); }
-    .badge-neutral .badge-dot { background: var(--text-3); }
-
-    .reasoning-box {
-      margin-top: 16px;
-      padding: 16px;
-      background: var(--bg);
-      border-radius: var(--radius);
+    .strategy-table td {
+      padding: 16px 0;
       font-size: 14px;
-      color: var(--text-2);
-      line-height: 1.75;
+      vertical-align: top;
     }
 
-    /* Graphic — chips */
-    .graphic-group { margin-bottom: 24px; }
-    .graphic-group:last-of-type { margin-bottom: 0; }
-
-    .group-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-2);
-      margin-bottom: 10px;
-    }
-
-    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-
-    .chip {
-      padding: 9px 16px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 13px;
+    .strategy-table .key {
+      width: 140px;
       font-weight: 500;
-      color: var(--text-2);
-      cursor: pointer;
-      transition: all 0.12s;
-      font-family: var(--font);
+      color: var(--gray-4);
     }
 
-    .chip:hover { border-color: var(--border-strong); color: var(--text-1); }
-
-    .chip.selected {
-      border-color: var(--select);
-      background: var(--select-bg);
-      color: var(--select);
-      font-weight: 600;
+    .strategy-table .val {
+      font-weight: 500;
+      color: var(--black);
     }
 
-    .chip-color {
-      display: flex;
+    .indicator {
+      display: inline-flex;
       align-items: center;
       gap: 8px;
     }
 
-    .swatch {
-      width: 14px; height: 14px;
-      border-radius: 4px;
-      border: 1px solid rgba(0,0,0,0.08);
+    .indicator-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--black);
     }
 
-    .graphic-note {
-      margin-top: 16px;
-      padding: 14px 16px;
-      background: var(--bg);
-      border-radius: var(--radius);
-      font-size: 13px;
-      color: var(--text-3);
-      line-height: 1.7;
+    .dot-red { background: var(--red); }
+
+    .reasoning-block {
+      padding: 32px 0;
+      border-top: 1px solid var(--gray-6);
+      margin-top: 8px;
+    }
+
+    .reasoning-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gray-4);
+      margin-bottom: 12px;
+    }
+
+    .reasoning-body {
+      font-size: 15px;
+      color: var(--gray-3);
+      line-height: 1.85;
+    }
+
+    /* Graphic options */
+    .graphic-group {
+      padding: 28px 0;
+      border-bottom: 1px solid var(--gray-6);
+    }
+
+    .graphic-group:last-of-type { border-bottom: none; }
+
+    .g-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--gray-4);
+      margin-bottom: 16px;
+    }
+
+    .options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .opt {
+      padding: 10px 20px;
+      border: 1px solid var(--gray-6);
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--gray-2);
+      cursor: pointer;
+      transition: all 0.12s;
+      font-family: var(--sans);
+      background: var(--white);
+    }
+
+    .opt:hover { border-color: var(--black); }
+
+    .opt.selected {
+      border-color: var(--black);
+      background: var(--black);
+      color: var(--white);
+    }
+
+    .opt-color {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .color-sq {
+      width: 14px;
+      height: 14px;
+      border: 1px solid var(--gray-6);
+    }
+
+    .selected .color-sq { border-color: var(--gray-3); }
+
+    .g-note {
+      padding: 24px 0 0;
+      font-size: 14px;
+      color: var(--gray-4);
+      line-height: 1.75;
     }
 
     /* Footer actions */
-    .actions {
-      margin-top: 16px;
+    .footer-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--gray-6);
     }
 
     .copy-btn {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 9px 16px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      gap: 8px;
+      background: none;
+      border: 1px solid var(--gray-6);
+      padding: 10px 20px;
       font-size: 13px;
       font-weight: 500;
-      color: var(--text-2);
+      color: var(--gray-3);
       cursor: pointer;
-      font-family: var(--font);
+      font-family: var(--sans);
       transition: all 0.12s;
-      box-shadow: var(--shadow-sm);
     }
 
-    .copy-btn:hover { border-color: var(--border-strong); color: var(--text-1); }
-    .copy-btn.copied { border-color: var(--green); color: var(--green); }
+    .copy-btn:hover { border-color: var(--black); color: var(--black); }
+    .copy-btn.copied { border-color: var(--black); color: var(--black); }
     .copy-btn svg { width: 14px; height: 14px; }
 
     .reset-btn {
       font-size: 13px;
-      font-weight: 500;
-      color: var(--text-3);
+      color: var(--gray-4);
       background: none;
       border: none;
       cursor: pointer;
-      transition: color 0.12s;
+      font-family: var(--sans);
+      text-decoration: underline;
+      text-underline-offset: 3px;
     }
-    .reset-btn:hover { color: var(--text-1); }
 
-    @media (max-width: 480px) {
-      .page { padding: 56px 16px 120px; }
-      .struct-headline { font-size: 26px; }
-      .card { padding: 20px; }
+    .reset-btn:hover { color: var(--black); }
+
+    @media (max-width: 640px) {
+      .nav { padding: 20px 24px; }
+      .main { padding: 48px 24px 120px; }
+      .r-headline { font-size: 32px; }
+      .step-bar { gap: 24px; }
+      .result-structure { padding: 40px 0; }
     }
   </style>
 </head>
 <body>
-  <div class="page">
-    <header class="header">
-      <div class="header-brand">Decision Flow</div>
-      <p class="header-desc">텍스트를 디자인에 사용할 수 있는 구조와 전략으로 변환합니다.</p>
-    </header>
+  <nav class="nav">
+    <div class="nav-brand">Decision Flow</div>
+    <div class="nav-step" id="navStep"><strong>01</strong> / 03</div>
+  </nav>
 
-    <!-- Steps -->
-    <div class="steps">
-      <div class="step-tab active" id="s1">1. Structure</div>
-      <div class="step-tab" id="s2">2. Strategy</div>
-      <div class="step-tab" id="s3">3. Graphic</div>
+  <div class="main">
+    <div class="step-bar">
+      <span class="step-tab active" id="s1">Structure</span>
+      <span class="step-tab" id="s2">Strategy</span>
+      <span class="step-tab" id="s3">Graphic</span>
     </div>
 
-    <!-- STEP 1: Input -->
+    <!-- STEP 1 -->
     <div class="panel active" id="p1">
-      <div class="card">
-        <div class="mode-row">
-          <button class="mode-btn active" onclick="switchTab('text')">Text</button>
-          <button class="mode-btn" onclick="switchTab('url')">URL</button>
-        </div>
-        <div id="textInput">
-          <textarea id="inputText" placeholder="분석할 텍스트를 입력하세요"></textarea>
-        </div>
-        <div id="urlInput" style="display:none;">
-          <input type="url" id="inputUrl" class="url-input" placeholder="https://example.com/article">
-        </div>
-        <div class="btn-row">
-          <span class="hint">⌘ + Enter</span>
-          <button class="btn-primary" id="convertBtn" onclick="runStep1()">분석하기</button>
-        </div>
+      <div class="section-title">Input</div>
+      <div class="toggle-row">
+        <button class="toggle-btn active" onclick="switchTab('text')">Text</button>
+        <button class="toggle-btn" onclick="switchTab('url')">URL</button>
       </div>
-      <div class="loading" id="ld1"><div class="loader"></div><div class="loading-text">구조를 분석하고 있습니다</div></div>
+      <div id="textInput">
+        <textarea id="inputText" placeholder="분석할 텍스트를 입력하세요"></textarea>
+      </div>
+      <div id="urlInput" style="display:none;">
+        <input type="url" id="inputUrl" class="url-input" placeholder="https://example.com/article">
+      </div>
+      <div class="action-row">
+        <span class="hint">⌘ Enter</span>
+        <button class="btn" id="convertBtn" onclick="runStep1()">Analyze</button>
+      </div>
+      <div class="loading" id="ld1"><span class="loading-text">Analyzing</span></div>
       <div class="error" id="e1"></div>
     </div>
 
     <!-- STEP 1 Result -->
     <div class="panel" id="p1r">
-      <div class="card">
-        <div class="struct-label" id="rLabel"></div>
-        <div class="struct-headline" id="rHeadline"></div>
-        <div class="struct-sub" id="rSub"></div>
+      <div class="result-structure">
+        <div class="r-label" id="rL"></div>
+        <div class="r-headline" id="rH"></div>
+        <div class="r-sub" id="rS"></div>
       </div>
-      <div class="btn-row" style="margin-top:12px">
-        <button class="btn-outline" onclick="go(1)">← 다시 입력</button>
-        <button class="btn-primary" onclick="runStep2()">다음 단계 →</button>
+      <div class="action-row">
+        <button class="btn-outline" onclick="go(1)">Back</button>
+        <button class="btn" onclick="runStep2()">Next →</button>
       </div>
     </div>
 
     <!-- STEP 2 Loading -->
     <div class="panel" id="p2l">
-      <div class="loading visible"><div class="loader"></div><div class="loading-text">표현 전략을 생성하고 있습니다</div></div>
+      <div class="loading visible"><span class="loading-text">Building Strategy</span></div>
     </div>
 
     <!-- STEP 2 Result -->
     <div class="panel" id="p2r">
-      <div class="card">
-        <div class="card-header">Expression Strategy</div>
-        <ul class="prop-list">
-          <li class="prop-item"><span class="prop-key">Language</span><span class="prop-val" id="pL"></span></li>
-          <li class="prop-item"><span class="prop-key">Emphasis</span><span class="prop-val" id="pE"></span></li>
-          <li class="prop-item"><span class="prop-key">Tone</span><span class="prop-val" id="pT"></span></li>
-          <li class="prop-item"><span class="prop-key">Readability</span><span class="prop-val" id="pR"></span></li>
-          <li class="prop-item"><span class="prop-key">Visual Weight</span><span class="prop-val" id="pV"></span></li>
-        </ul>
-        <div class="reasoning-box" id="pRs"></div>
+      <div class="section-title">Expression Strategy</div>
+      <table class="strategy-table">
+        <tr><td class="key">Language</td><td class="val" id="pL"></td></tr>
+        <tr><td class="key">Emphasis</td><td class="val" id="pE"></td></tr>
+        <tr><td class="key">Tone</td><td class="val" id="pT"></td></tr>
+        <tr><td class="key">Readability</td><td class="val" id="pR"></td></tr>
+        <tr><td class="key">Visual Weight</td><td class="val" id="pV"></td></tr>
+      </table>
+      <div class="reasoning-block">
+        <div class="reasoning-label">Reasoning</div>
+        <div class="reasoning-body" id="pRs"></div>
       </div>
-      <div class="btn-row" style="margin-top:12px">
-        <button class="btn-outline" onclick="go(1,1)">← Structure</button>
-        <button class="btn-primary" onclick="runStep3()">다음 단계 →</button>
+      <div class="action-row">
+        <button class="btn-outline" onclick="go(1,1)">Back</button>
+        <button class="btn" onclick="runStep3()">Next →</button>
       </div>
     </div>
 
     <!-- STEP 3 Loading -->
     <div class="panel" id="p3l">
-      <div class="loading visible"><div class="loader"></div><div class="loading-text">그래픽 옵션을 생성하고 있습니다</div></div>
+      <div class="loading visible"><span class="loading-text">Generating Options</span></div>
     </div>
 
     <!-- STEP 3 Result -->
     <div class="panel" id="p3r">
-      <div class="card">
-        <div class="card-header">Graphic Options</div>
-        <div class="graphic-group">
-          <div class="group-label">Color Mood</div>
-          <div class="chips" id="gC"></div>
-        </div>
-        <div class="graphic-group">
-          <div class="group-label">Layout</div>
-          <div class="chips" id="gL"></div>
-        </div>
-        <div class="graphic-group">
-          <div class="group-label">Style Direction</div>
-          <div class="chips" id="gS"></div>
-        </div>
-        <div class="graphic-note" id="gN"></div>
+      <div class="section-title">Graphic Options</div>
+      <div class="graphic-group">
+        <div class="g-label">Color</div>
+        <div class="options" id="gC"></div>
       </div>
-      <div class="actions">
+      <div class="graphic-group">
+        <div class="g-label">Layout</div>
+        <div class="options" id="gL"></div>
+      </div>
+      <div class="graphic-group">
+        <div class="g-label">Style</div>
+        <div class="options" id="gS"></div>
+      </div>
+      <div class="g-note" id="gN"></div>
+
+      <div class="footer-bar">
         <button class="copy-btn" onclick="copyAll(this)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-          전체 복사
+          Copy All
         </button>
-        <button class="reset-btn" onclick="resetAll()">처음으로</button>
+        <button class="reset-btn" onclick="resetAll()">Start Over</button>
       </div>
-      <div class="btn-row" style="margin-top:8px">
-        <button class="btn-outline" onclick="go(2,1)">← Strategy</button>
+      <div class="action-row" style="margin-top:12px">
+        <button class="btn-outline" onclick="go(2,1)">Back</button>
         <span></span>
       </div>
     </div>
@@ -586,15 +583,15 @@
 
     function switchTab(t){
       tab=t;
-      document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
-      document.querySelector(`.mode-btn[onclick="switchTab('${t}')"]`).classList.add('active');
+      document.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelector(`.toggle-btn[onclick="switchTab('${t}')"]`).classList.add('active');
       document.getElementById('textInput').style.display=t==='text'?'block':'none';
       document.getElementById('urlInput').style.display=t==='url'?'block':'none';
     }
 
     async function fetchUrl(u){
       const r=await fetch(`https://r.jina.ai/${u}`,{headers:{Accept:'text/plain'}});
-      if(!r.ok)throw new Error('URL 불러오기 실패');
+      if(!r.ok)throw new Error('URL error');
       return(await r.text()).slice(0,3000);
     }
 
@@ -607,6 +604,7 @@
         if(i+1===n)el.classList.add('active');
         else if(i+1<n)el.classList.add('done');
       });
+      document.getElementById('navStep').innerHTML=`<strong>0${n}</strong> / 03`;
     }
 
     function go(n,r){steps(n);if(n===1&&!r)show('p1');else if(n===1)show('p1r');else if(n===2)show('p2r');}
@@ -632,7 +630,9 @@
       document.getElementById('ld1').classList.add('visible');document.getElementById('e1').classList.remove('visible');document.getElementById('convertBtn').disabled=true;
       try{
         S=await ai(`Distill input into design structure. Output ONLY JSON: {"label":"ENGLISH UPPERCASE 1-3 words","headline":"Korean max 8 words punchy","sub":"Korean one sentence complements headline"}\nheadline extremely short. sub never repeats headline.\nExample: {"label":"WATCHA PEDIA","headline":"취향 아카이브","sub":"취향을 기록하고 발견하는 서비스"}`,text);
-        document.getElementById('rLabel').textContent=S.label||'';document.getElementById('rHeadline').textContent=S.headline||'';document.getElementById('rSub').textContent=S.sub||'';
+        document.getElementById('rL').textContent=S.label||'';
+        document.getElementById('rH').textContent=S.headline||'';
+        document.getElementById('rS').textContent=S.sub||'';
         steps(1);show('p1r');
       }catch(e){err('e1',e.message);}
       finally{document.getElementById('ld1').classList.remove('visible');document.getElementById('convertBtn').disabled=false;}
@@ -642,12 +642,10 @@
       steps(2);show('p2l');
       try{
         T=await ai(`Expression strategist. Given structure, decide visual expression. Output ONLY JSON:\n{"primary_language":"ko/en/mix","emphasis":"label/headline/sub","tone":"information/emotion/blend","readability":"strong/medium/low","visual_weight":"text-centric/graphic-support/graphic-dominant","reasoning":"2-3 Korean sentences"}`,JSON.stringify(S));
-        const lm={ko:['KO','badge-blue'],en:['EN','badge-neutral'],mix:['MIX','badge-amber']};
-        const tm={information:['Information','badge-blue'],emotion:['Emotion','badge-amber'],blend:['Blend','badge-neutral']};
-        const rm={strong:['Strong','badge-green'],medium:['Medium','badge-amber'],low:['Low','badge-red']};
-        setBadge('pL',T.primary_language,lm);
+        setIndicator('pL',T.primary_language);
         document.getElementById('pE').textContent=(T.emphasis||'').charAt(0).toUpperCase()+(T.emphasis||'').slice(1);
-        setBadge('pT',T.tone,tm);setBadge('pR',T.readability,rm);
+        setIndicator('pT',T.tone);
+        setIndicator('pR',T.readability);
         const vm={'text-centric':'Text 중심','graphic-support':'Graphic 보조','graphic-dominant':'Graphic 강조'};
         document.getElementById('pV').textContent=vm[T.visual_weight]||T.visual_weight||'';
         document.getElementById('pRs').textContent=T.reasoning||'';
@@ -655,37 +653,38 @@
       }catch(e){err('eG',e.message);go(1,1);}
     }
 
-    function setBadge(id,val,map){
-      const el=document.getElementById(id),e=map[val];
-      if(e)el.innerHTML=`<span class="badge ${e[1]}"><span class="badge-dot"></span>${e[0]}</span>`;
-      else el.textContent=val||'';
+    function setIndicator(id,val){
+      const el=document.getElementById(id);
+      const label=(val||'').charAt(0).toUpperCase()+(val||'').slice(1);
+      el.innerHTML=`<span class="indicator"><span class="indicator-dot"></span>${label}</span>`;
     }
 
     async function runStep3(){
       steps(3);show('p3l');
       try{
         G=await ai(`Graphic advisor. Given structure+strategy, suggest options. Output ONLY JSON:\n{"colors":[{"name":"Korean","hex":"#hex"},{"name":"...","hex":"..."},{"name":"...","hex":"..."}],"layouts":["Korean 1","2","3"],"styles":["Korean 1","2","3"],"note":"1-2 Korean sentences"}`,JSON.stringify({structure:S,strategy:T}));
-        renderChips('gC',G.colors||[],c=>{const d=document.createElement('div');d.className='chip chip-color';d.innerHTML=`<span class="swatch" style="background:${c.hex}"></span>${c.name}`;d.onclick=()=>d.classList.toggle('selected');return d;});
-        renderChips('gL',G.layouts||[],l=>{const d=document.createElement('div');d.className='chip';d.textContent=l;d.onclick=()=>d.classList.toggle('selected');return d;});
-        renderChips('gS',G.styles||[],s=>{const d=document.createElement('div');d.className='chip';d.textContent=s;d.onclick=()=>d.classList.toggle('selected');return d;});
+
+        render('gC',G.colors||[],c=>{const d=document.createElement('div');d.className='opt opt-color';d.innerHTML=`<span class="color-sq" style="background:${c.hex}"></span>${c.name}`;d.onclick=()=>d.classList.toggle('selected');return d;});
+        render('gL',G.layouts||[],l=>{const d=document.createElement('div');d.className='opt';d.textContent=l;d.onclick=()=>d.classList.toggle('selected');return d;});
+        render('gS',G.styles||[],s=>{const d=document.createElement('div');d.className='opt';d.textContent=s;d.onclick=()=>d.classList.toggle('selected');return d;});
         document.getElementById('gN').textContent=G.note||'';
         show('p3r');
       }catch(e){err('eG',e.message);show('p2r');steps(2);}
     }
 
-    function renderChips(id,arr,fn){const el=document.getElementById(id);el.innerHTML='';arr.forEach(item=>el.appendChild(fn(item)));}
+    function render(id,arr,fn){const el=document.getElementById(id);el.innerHTML='';arr.forEach(i=>el.appendChild(fn(i)));}
 
     function copyAll(btn){
       const t=[`[Structure]`,`label: ${S.label||''}`,`headline: ${S.headline||''}`,`sub: ${S.sub||''}`,'',`[Strategy]`,`language: ${T.primary_language||''}`,`emphasis: ${T.emphasis||''}`,`tone: ${T.tone||''}`,`readability: ${T.readability||''}`,`visual weight: ${T.visual_weight||''}`,`reasoning: ${T.reasoning||''}`,'',`[Graphic]`,`colors: ${(G.colors||[]).map(c=>c.name+' '+c.hex).join(', ')}`,`layouts: ${(G.layouts||[]).join(' / ')}`,`styles: ${(G.styles||[]).join(' / ')}`,`note: ${G.note||''}`].join('\n');
       navigator.clipboard.writeText(t);
-      const o=btn.innerHTML;btn.textContent='✓ 복사됨';btn.classList.add('copied');
+      const o=btn.innerHTML;btn.textContent='✓ Copied';btn.classList.add('copied');
       setTimeout(()=>{btn.innerHTML=o;btn.classList.remove('copied');},1500);
     }
 
     function resetAll(){S={};T={};G={};steps(1);show('p1');document.getElementById('inputText').value='';document.getElementById('inputUrl').value='';}
 
     const ta=document.getElementById('inputText');
-    ta.addEventListener('input',()=>{ta.style.height='auto';ta.style.height=Math.max(120,ta.scrollHeight)+'px';});
+    ta.addEventListener('input',()=>{ta.style.height='auto';ta.style.height=Math.max(140,ta.scrollHeight)+'px';});
     document.getElementById('inputText').addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter')runStep1();});
     document.getElementById('inputUrl').addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter')runStep1();});
   </script>
