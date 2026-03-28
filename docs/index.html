@@ -249,14 +249,14 @@
       const W=2500,H=850;
       const pal=[base,a1,a2];
 
-      // Build column widths (5-7 columns)
-      const nC=5+Math.floor(rand()*3);
+      // Build column widths (3-4 columns)
+      const nC=3+Math.floor(rand()*2);
       const colX=[0];
       for(let i=1;i<nC;i++) colX.push(Math.round(W/nC*i+(rand()-.5)*W/nC*.5));
       colX.push(W);
 
-      // Build row heights (3-5 rows)
-      const nR=3+Math.floor(rand()*3);
+      // Build row heights (2-3 rows)
+      const nR=2+Math.floor(rand()*2);
       const rowY=[0];
       for(let i=1;i<nR;i++) rowY.push(Math.round(H/nR*i+(rand()-.5)*H/nR*.4));
       rowY.push(H);
@@ -280,8 +280,8 @@
         }
       }
 
-      // Overlay accents — overlapping blocks for depth and richness
-      const nAcc=5+Math.floor(rand()*6);
+      // Overlay accents — 2-3 overlapping blocks for depth
+      const nAcc=2+Math.floor(rand()*2);
       for(let i=0;i<nAcc;i++){
         const c1=Math.floor(rand()*nC),r1=Math.floor(rand()*nR);
         // Span 1-2 columns, 1-2 rows
