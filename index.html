@@ -50,13 +50,13 @@
     .r-label { font-family:var(--mono); font-size:11px; font-weight:500; letter-spacing:.16em; text-transform:uppercase; color:var(--gray-4); margin-bottom:32px; }
     .r-headline { font-family:var(--serif); font-size:48px; font-weight:900; line-height:1.15; letter-spacing:-.03em; color:var(--black); margin-bottom:16px; }
     .r-sub { font-size:18px; font-weight:400; color:var(--gray-3); line-height:1.65; }
-    .palette-opt { display:flex; align-items:center; gap:16px; padding:16px; border:1px solid var(--gray-6); cursor:pointer; transition:all .12s; margin-bottom:8px; }
-    .palette-opt:hover { border-color:var(--gray-3); } .palette-opt.selected { border-color:var(--black); background:var(--gray-7); }
-    .palette-swatches { display:flex; gap:4px; flex-shrink:0; }
-    .palette-swatch { width:36px; height:36px; border:1px solid rgba(0,0,0,.06); }
-    .palette-name { font-size:14px; font-weight:500; color:var(--gray-2); }
-    .g-note { padding:24px 0 0; font-size:14px; color:var(--gray-4); line-height:1.75; }
     .preview-wrap { background:var(--gray-7); padding:12px; margin-bottom:24px; } .preview-wrap canvas { width:100%; height:auto; display:block; }
+    .palette-bar { display:flex; gap:6px; margin-bottom:24px; }
+    .pal-chip { display:flex; gap:3px; padding:8px 12px; border:2px solid var(--gray-6); cursor:pointer; transition:all .12s; align-items:center; }
+    .pal-chip:hover { border-color:var(--gray-3); }
+    .pal-chip.active { border-color:var(--black); }
+    .pal-sq { width:20px; height:20px; border:1px solid rgba(0,0,0,.06); }
+    .pal-label { font-size:12px; font-weight:500; color:var(--gray-3); margin-left:8px; white-space:nowrap; }
     .preview-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; }
     .footer-bar { display:flex; align-items:center; justify-content:space-between; margin-top:48px; padding-top:24px; border-top:1px solid var(--gray-6); }
     .copy-btn { display:inline-flex; align-items:center; gap:8px; background:none; border:1px solid var(--gray-6); padding:10px 20px; font-size:13px; font-weight:500; color:var(--gray-3); cursor:pointer; font-family:var(--sans); transition:all .12s; }
@@ -64,19 +64,18 @@
     .copy-btn svg { width:14px; height:14px; }
     .reset-btn { font-size:13px; color:var(--gray-4); background:none; border:none; cursor:pointer; font-family:var(--sans); text-decoration:underline; text-underline-offset:3px; }
     .reset-btn:hover { color:var(--black); }
-    @media(max-width:640px){ .nav{padding:20px 24px} .main{padding:48px 24px 120px} .r-headline{font-size:32px} .step-bar{gap:24px} .result-structure{padding:40px 0} }
+    @media(max-width:640px){ .nav{padding:20px 24px} .main{padding:48px 24px 120px} .r-headline{font-size:32px} .step-bar{gap:24px} .result-structure{padding:40px 0} .palette-bar{flex-wrap:wrap} }
   </style>
 </head>
 <body>
   <nav class="nav">
     <div class="nav-brand">Decision Flow</div>
-    <div class="nav-step" id="navStep"><strong>01</strong> / 03</div>
+    <div class="nav-step" id="navStep"><strong>01</strong> / 02</div>
   </nav>
   <div class="main">
     <div class="step-bar">
       <span class="step-tab active" id="s1">Structure</span>
-      <span class="step-tab" id="s2">Graphic</span>
-      <span class="step-tab" id="s3">Preview</span>
+      <span class="step-tab" id="s2">Preview</span>
     </div>
 
     <!-- STEP 1: Input -->
@@ -106,27 +105,17 @@
         <div class="r-headline" id="rH"></div>
         <div class="r-sub" id="rS"></div>
       </div>
-      <div class="action-row"><button class="btn-outline" onclick="go(1)">Back</button><button class="btn" onclick="runStep2()">Next →</button></div>
+      <div class="action-row"><button class="btn-outline" onclick="go(1)">Back</button><button class="btn" onclick="runPreview()">Preview →</button></div>
     </div>
 
-    <!-- STEP 2: Graphic Loading -->
-    <div class="panel" id="p2l"><div class="loading visible"><span class="loading-text">Generating Palette</span></div></div>
+    <!-- STEP 2: Preview Loading -->
+    <div class="panel" id="p2l"><div class="loading visible"><span class="loading-text">Generating Preview</span></div></div>
 
-    <!-- STEP 2: Graphic Result (palette) -->
+    <!-- STEP 2: Preview Result -->
     <div class="panel" id="p2r">
-      <div class="section-title">Color Palette</div>
-      <div id="gPalettes"></div>
-      <div class="g-note" id="gN"></div>
-      <div class="action-row"><button class="btn-outline" onclick="go(1,1)">Back</button><button class="btn" onclick="runStep3()">Next →</button></div>
-    </div>
-
-    <!-- STEP 3: Preview Loading -->
-    <div class="panel" id="p3l"><div class="loading visible"><span class="loading-text">Rendering Preview</span></div></div>
-
-    <!-- STEP 3: Preview Result -->
-    <div class="panel" id="p3r">
       <div class="section-title">Cover Preview</div>
       <div class="preview-wrap"><canvas id="cvs"></canvas></div>
+      <div class="palette-bar" id="palBar"></div>
       <div class="preview-toolbar">
         <button class="btn-outline" onclick="regenerate()">Regenerate</button>
         <div style="display:flex;gap:8px">
@@ -138,7 +127,7 @@
         <button class="copy-btn" onclick="copyAll(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy All</button>
         <button class="reset-btn" onclick="resetAll()">Start Over</button>
       </div>
-      <div class="action-row" style="margin-top:12px"><button class="btn-outline" onclick="go(2,1)">Back</button><span></span></div>
+      <div class="action-row" style="margin-top:12px"><button class="btn-outline" onclick="go(1,1)">Back</button><span></span></div>
     </div>
     <div class="error" id="eG"></div>
   </div>
@@ -162,8 +151,8 @@
     function switchCat(btn,c){cat=c;document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
     function switchTab(t){tab=t;document.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.toggle-btn[onclick="switchTab('${t}')"]`).classList.add('active');document.getElementById('textInput').style.display=t==='text'?'block':'none';document.getElementById('urlInput').style.display=t==='url'?'block':'none';}
     function show(id){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');}
-    function steps(n){['s1','s2','s3'].forEach((id,i)=>{const el=document.getElementById(id);el.className='step-tab';if(i+1===n)el.classList.add('active');else if(i+1<n)el.classList.add('done');});document.getElementById('navStep').innerHTML=`<strong>0${n}</strong> / 03`;}
-    function go(n,r){steps(n);if(n===1&&!r)show('p1');else if(n===1)show('p1r');else if(n===2)show('p2r');}
+    function steps(n){['s1','s2'].forEach((id,i)=>{const el=document.getElementById(id);el.className='step-tab';if(i+1===n)el.classList.add('active');else if(i+1<n)el.classList.add('done');});document.getElementById('navStep').innerHTML=`<strong>0${n}</strong> / 02`;}
+    function go(n,r){steps(n);if(n===1&&!r)show('p1');else if(n===1)show('p1r');}
     function err(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.add('visible');}
 
     async function fetchUrl(u){const r=await fetch(`https://r.jina.ai/${u}`,{headers:{Accept:'text/plain'}});if(!r.ok)throw new Error('URL error');return(await r.text()).slice(0,3000);}
@@ -177,30 +166,44 @@
       document.getElementById('ld1').classList.add('visible');document.getElementById('e1').classList.remove('visible');document.getElementById('convertBtn').disabled=true;
       try{
         S=await ai(`${CAT_CONTEXT[cat]}\n\nDistill input into blog cover title for WATCHA's tech blog. The cover has 2 lines of text.\n\nOutput ONLY JSON:\n{"line1":"cover title LINE 1 — key concept, 1-4 words (Korean or English, whichever reads best for this content)","line2":"cover title LINE 2 — supporting detail, 1-4 words (Korean or English)","sub":"one sentence description for reference"}\n\nExamples:\n{"line1":"WATCHA PEDIA","line2":"취향 아카이브","sub":"취향을 기록하고 발견하는 서비스"}\n{"line1":"데이터 마이그레이션","line2":"시스템 구축","sub":"멀티 클라우드 환경에서의 데이터 이관"}\n{"line1":"Kubernetes-native","line2":"로그 플랫폼","sub":"클라우드 네이티브 로깅 시스템 구축기"}`,text);
-        document.getElementById('rL').textContent=S.line1||S.label||'';
-        document.getElementById('rH').textContent=S.line2||S.headline||'';
+        document.getElementById('rL').textContent=S.line1||'';
+        document.getElementById('rH').textContent=S.line2||'';
         document.getElementById('rS').textContent=S.sub||'';
         steps(1);show('p1r');
       }catch(e){err('e1',e.message);}
       finally{document.getElementById('ld1').classList.remove('visible');document.getElementById('convertBtn').disabled=false;}
     }
 
-    /* ── Step 2: Strategy(silent) + Palette ── */
-    async function runStep2(){
+    /* ── Step 2: Preview (strategy+palette+render) ── */
+    async function runPreview(){
       steps(2);show('p2l');
       try{
-        // Strategy (silent — feeds into palette)
+        await document.fonts.load('800 144px "WATCHA Sans OTF"');
         T=await ai(`${CAT_CONTEXT[cat]}\n\nExpression strategist for WATCHA blog cover. Output ONLY JSON:\n{"primary_language":"ko/en/mix","emphasis":"line1/line2","tone":"information/emotion/blend","visual_weight":"text-centric/graphic-support/graphic-dominant"}`,JSON.stringify(S));
+        G=await ai(`${CAT_CONTEXT[cat]}\n\nColor palette advisor for WATCHA blog cover (2500×850px). Suggest 3 color palettes.\n\nCOLOR STRATEGY — choose the best approach per palette:\n- Duo-tone: 2 bold colors (e.g., dark charcoal #3D3D3D + vivid teal #00BFA5)\n- Monochromatic: 2-3 tones of same hue (e.g., #D72660 + #FF387A + #FF7EB3)\n- Analogous: neighboring hues (e.g., navy #1B2E4B + blue #4A80C4 + sky #7CB5F0)\n\nRULES:\n- All colors must keep white (#FFFFFF) text highly readable\n- No muddy, gray, or desaturated colors\n- Consider the article topic for color mood\n- If only 2 colors needed, set accent2 same as accent1\n\nOutput ONLY JSON:\n{"palettes":[{"name":"Korean 2-3 words","base":"#hex","accent1":"#hex","accent2":"#hex"},{"name":"...","base":"#hex","accent1":"#hex","accent2":"#hex"},{"name":"...","base":"#hex","accent1":"#hex","accent2":"#hex"}],"note":"1-2 Korean sentences"}`,JSON.stringify({structure:S,strategy:T}));
 
-        // Palette
-        G=await ai(`${CAT_CONTEXT[cat]}\n\nColor palette advisor for WATCHA blog cover (2500×850px). Suggest 3 color palettes.\n\nCOLOR STRATEGY — choose the best approach per palette:\n- Duo-tone: 2 bold colors (e.g., dark charcoal #3D3D3D + vivid teal #00BFA5)\n- Monochromatic: 2-3 tones of same hue (e.g., #D72660 + #FF387A + #FF7EB3)\n- Analogous: neighboring hues (e.g., navy #1B2E4B + blue #4A80C4 + sky #7CB5F0)\n\nRULES:\n- All colors must keep white (#FFFFFF) text highly readable\n- No muddy, gray, or desaturated colors\n- Consider the article topic for color mood — tech/engineering feels modern, brand content feels expressive\n- If only 2 colors needed, set accent2 same as accent1\n\nOutput ONLY JSON:\n{"palettes":[{"name":"Korean 2-3 words","base":"#hex","accent1":"#hex","accent2":"#hex"},{"name":"...","base":"#hex","accent1":"#hex","accent2":"#hex"},{"name":"...","base":"#hex","accent1":"#hex","accent2":"#hex"}],"note":"1-2 Korean sentences"}`,JSON.stringify({structure:S,strategy:T}));
-
-        const ct=document.getElementById('gPalettes');ct.innerHTML='';
-        (G.palettes||[]).forEach((p,i)=>{const d=document.createElement('div');d.className='palette-opt'+(i===0?' selected':'');d.innerHTML=`<div class="palette-swatches"><span class="palette-swatch" style="background:${p.base}"></span><span class="palette-swatch" style="background:${p.accent1}"></span>${p.accent1!==p.accent2?`<span class="palette-swatch" style="background:${p.accent2}"></span>`:''}</div><span class="palette-name">${p.name}</span>`;d.onclick=()=>{document.querySelectorAll('.palette-opt').forEach(o=>o.classList.remove('selected'));d.classList.add('selected');selectedPalette=p;};ct.appendChild(d);});
-        selectedPalette=G.palettes?.[0]||null;
-        document.getElementById('gN').textContent=G.note||'';
+        buildPaletteBar();
+        selectedPalette=G.palettes?.[0]||{base:'#333',accent1:'#555',accent2:'#777'};
+        renderCover();
         show('p2r');
       }catch(e){err('eG',e.message);go(1,1);}
+    }
+
+    function buildPaletteBar(){
+      const bar=document.getElementById('palBar');bar.innerHTML='';
+      (G.palettes||[]).forEach((p,i)=>{
+        const chip=document.createElement('div');
+        chip.className='pal-chip'+(i===0?' active':'');
+        const unique=p.accent1!==p.accent2;
+        chip.innerHTML=`<span class="pal-sq" style="background:${p.base}"></span><span class="pal-sq" style="background:${p.accent1}"></span>${unique?`<span class="pal-sq" style="background:${p.accent2}"></span>`:''}<span class="pal-label">${p.name}</span>`;
+        chip.onclick=()=>{
+          document.querySelectorAll('.pal-chip').forEach(c=>c.classList.remove('active'));
+          chip.classList.add('active');
+          selectedPalette=p;
+          renderCover();
+        };
+        bar.appendChild(chip);
+      });
     }
 
     /* ── Utilities ── */
@@ -208,115 +211,60 @@
     function mulberry32(seed){return function(){seed|=0;seed=(seed+0x6D2B79F5)|0;let t=Math.imul(seed^(seed>>>15),1|seed);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};}
     function snap(v,g){return Math.round(v/g)*g;}
 
-    /* ── Pattern: diverse shapes ── */
-    function genPattern(seed, colors){
+    /* ── Pattern ── */
+    function genPattern(seed,colors){
       const rand=mulberry32(seed);
-      const [base,a1,a2]=colors;
+      const[base,a1,a2]=colors;
       const shapes=[];
-
-      // Pick 1-2 shape types for this cover
       const allTypes=['rect','triangle','circle','diamond'];
       const primary=allTypes[Math.floor(rand()*allTypes.length)];
       const secondary=allTypes[Math.floor(rand()*allTypes.length)];
-
-      const zones=[
-        {x:-100,y:0,w:700,h:850},
-        {x:1900,y:0,w:700,h:850},
-        {x:0,y:-50,w:800,h:350},
-        {x:1700,y:-50,w:800,h:350},
-        {x:0,y:550,w:800,h:350},
-        {x:1700,y:550,w:800,h:350},
-        {x:500,y:550,w:500,h:300},
-        {x:1500,y:550,w:500,h:300},
-      ];
-
-      const N=5+Math.floor(rand()*3);
-      const used=[];
-      for(let i=0;i<N;i++){
-        let zi=Math.floor(rand()*zones.length);
-        while(used.includes(zi)&&used.length<zones.length)zi=(zi+1)%zones.length;
-        used.push(zi);
-        const z=zones[zi];
-        const sw=snap(200+rand()*400,50);
-        const sh=snap(200+rand()*400,50);
-        const sx=snap(z.x+rand()*(z.w-sw*.3),50);
-        const sy=snap(z.y+rand()*(z.h-sh*.3),50);
-        const type=rand()<.7?primary:secondary;
-        const color=[base,a1,a2][Math.floor(rand()*3)];
-        shapes.push({x:sx,y:sy,w:sw,h:sh,type,color,opacity:+(0.6+rand()*0.4).toFixed(2)});
-      }
-
-      // 2-3 small accent shapes
-      for(let i=0;i<2+Math.floor(rand()*2);i++){
-        const sw=snap(80+rand()*200,50);
-        const sh=snap(80+rand()*200,50);
-        const sx=rand()<.5?snap(rand()*500,50):snap(2000+rand()*500,50);
-        const sy=snap(rand()*850,50);
-        const type=rand()<.5?primary:secondary;
-        shapes.push({x:sx,y:sy,w:sw,h:sh,type,color:rand()<.5?a1:a2,opacity:+(0.7+rand()*0.3).toFixed(2)});
-      }
+      const zones=[{x:-100,y:0,w:700,h:850},{x:1900,y:0,w:700,h:850},{x:0,y:-50,w:800,h:350},{x:1700,y:-50,w:800,h:350},{x:0,y:550,w:800,h:350},{x:1700,y:550,w:800,h:350},{x:500,y:550,w:500,h:300},{x:1500,y:550,w:500,h:300}];
+      const N=5+Math.floor(rand()*3),used=[];
+      for(let i=0;i<N;i++){let zi=Math.floor(rand()*zones.length);while(used.includes(zi)&&used.length<zones.length)zi=(zi+1)%zones.length;used.push(zi);const z=zones[zi];
+        const sw=snap(200+rand()*400,50),sh=snap(200+rand()*400,50);
+        const sx=snap(z.x+rand()*(z.w-sw*.3),50),sy=snap(z.y+rand()*(z.h-sh*.3),50);
+        shapes.push({x:sx,y:sy,w:sw,h:sh,type:rand()<.7?primary:secondary,color:[base,a1,a2][Math.floor(rand()*3)],opacity:+(0.6+rand()*0.4).toFixed(2)});}
+      for(let i=0;i<2+Math.floor(rand()*2);i++){const sw=snap(80+rand()*200,50),sh=snap(80+rand()*200,50);
+        const sx=rand()<.5?snap(rand()*500,50):snap(2000+rand()*500,50),sy=snap(rand()*850,50);
+        shapes.push({x:sx,y:sy,w:sw,h:sh,type:rand()<.5?primary:secondary,color:rand()<.5?a1:a2,opacity:+(0.7+rand()*0.3).toFixed(2)});}
       return shapes;
     }
 
-    function drawShape(ctx,s){
-      ctx.globalAlpha=s.opacity;ctx.fillStyle=s.color;
-      switch(s.type){
-        case'rect':ctx.fillRect(s.x,s.y,s.w,s.h);break;
-        case'triangle':ctx.beginPath();ctx.moveTo(s.x+s.w/2,s.y);ctx.lineTo(s.x+s.w,s.y+s.h);ctx.lineTo(s.x,s.y+s.h);ctx.closePath();ctx.fill();break;
-        case'circle':ctx.beginPath();ctx.arc(s.x+s.w/2,s.y+s.h/2,Math.min(s.w,s.h)/2,0,Math.PI*2);ctx.fill();break;
-        case'diamond':ctx.beginPath();ctx.moveTo(s.x+s.w/2,s.y);ctx.lineTo(s.x+s.w,s.y+s.h/2);ctx.lineTo(s.x+s.w/2,s.y+s.h);ctx.lineTo(s.x,s.y+s.h/2);ctx.closePath();ctx.fill();break;
-      }
-    }
+    function drawShape(ctx,s){ctx.globalAlpha=s.opacity;ctx.fillStyle=s.color;
+      switch(s.type){case'rect':ctx.fillRect(s.x,s.y,s.w,s.h);break;
+      case'triangle':ctx.beginPath();ctx.moveTo(s.x+s.w/2,s.y);ctx.lineTo(s.x+s.w,s.y+s.h);ctx.lineTo(s.x,s.y+s.h);ctx.closePath();ctx.fill();break;
+      case'circle':ctx.beginPath();ctx.arc(s.x+s.w/2,s.y+s.h/2,Math.min(s.w,s.h)/2,0,Math.PI*2);ctx.fill();break;
+      case'diamond':ctx.beginPath();ctx.moveTo(s.x+s.w/2,s.y);ctx.lineTo(s.x+s.w,s.y+s.h/2);ctx.lineTo(s.x+s.w/2,s.y+s.h);ctx.lineTo(s.x,s.y+s.h/2);ctx.closePath();ctx.fill();break;}}
 
-    function shapeToSVG(s){
-      const o=`opacity="${s.opacity}"`;const f=`fill="${s.color}"`;
-      switch(s.type){
-        case'rect':return`<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" ${f} ${o}/>`;
-        case'triangle':return`<polygon points="${s.x+s.w/2},${s.y} ${s.x+s.w},${s.y+s.h} ${s.x},${s.y+s.h}" ${f} ${o}/>`;
-        case'circle':{const r=Math.min(s.w,s.h)/2;return`<circle cx="${s.x+s.w/2}" cy="${s.y+s.h/2}" r="${r}" ${f} ${o}/>`;}
-        case'diamond':return`<polygon points="${s.x+s.w/2},${s.y} ${s.x+s.w},${s.y+s.h/2} ${s.x+s.w/2},${s.y+s.h} ${s.x},${s.y+s.h/2}" ${f} ${o}/>`;
-        default:return`<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" ${f} ${o}/>`;
-      }
+    function shapeToSVG(s){const o=`opacity="${s.opacity}"`,f=`fill="${s.color}"`;
+      switch(s.type){case'rect':return`<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" ${f} ${o}/>`;
+      case'triangle':return`<polygon points="${s.x+s.w/2},${s.y} ${s.x+s.w},${s.y+s.h} ${s.x},${s.y+s.h}" ${f} ${o}/>`;
+      case'circle':{const r=Math.min(s.w,s.h)/2;return`<circle cx="${s.x+s.w/2}" cy="${s.y+s.h/2}" r="${r}" ${f} ${o}/>`;}
+      case'diamond':return`<polygon points="${s.x+s.w/2},${s.y} ${s.x+s.w},${s.y+s.h/2} ${s.x+s.w/2},${s.y+s.h} ${s.x},${s.y+s.h/2}" ${f} ${o}/>`;
+      default:return`<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" ${f} ${o}/>`;}
     }
 
     /* ── Text ── */
     function wrapText(ctx,text,maxW){const ps=text.split('\n'),lines=[];for(const p of ps){if(!p.trim()){lines.push('');continue;}const ws=p.split(/\s+/).filter(w=>w);let c=ws[0]||'';for(let i=1;i<ws.length;i++){const t=c+' '+ws[i];if(ctx.measureText(t).width>maxW){lines.push(c);c=ws[i];}else c=t;}if(c)lines.push(c);}return lines;}
+    function forceTwoLines(ctx,text,maxW){let lines=wrapText(ctx,text,maxW);if(lines.length===1){const ws=lines[0].split(/\s+/);if(ws.length>=2){const m=Math.ceil(ws.length/2);lines=[ws.slice(0,m).join(' '),ws.slice(m).join(' ')];}else{const m=Math.ceil(text.length/2);lines=[text.slice(0,m),text.slice(mid)];}}if(lines.length>2)lines=[lines[0],lines.slice(1).join(' ')];return lines;}
+    function buildCoverTitle(){const l1=S.line1||'',l2=S.line2||'';if(l1&&l2)return l1+'\n'+l2;return l1||l2;}
 
-    function forceTwoLines(ctx,text,maxW){let lines=wrapText(ctx,text,maxW);if(lines.length===1){const ws=lines[0].split(/\s+/);if(ws.length>=2){const m=Math.ceil(ws.length/2);lines=[ws.slice(0,m).join(' '),ws.slice(m).join(' ')];}else{const m=Math.ceil(text.length/2);lines=[text.slice(0,m),text.slice(m)];}}if(lines.length>2)lines=[lines[0],lines.slice(1).join(' ')];return lines;}
-
-    function buildCoverTitle(){
-      const l1=S.line1||S.label||'';
-      const l2=S.line2||S.headline||'';
-      if(l1&&l2) return l1+'\n'+l2;
-      return l1||l2;
-    }
-
-    /* ── Step 3: Preview ── */
-    async function runStep3(){
-      steps(3);show('p3l');
-      try{await document.fonts.load('800 144px "WATCHA Sans OTF"');renderCover();show('p3r');}
-      catch(e){err('eG',e.message);go(2,1);}
-    }
-
+    /* ── Render ── */
     function renderCover(){
       const canvas=document.getElementById('cvs'),ctx=canvas.getContext('2d');
       canvas.width=2500;canvas.height=850;
       const pal=selectedPalette||{base:'#333',accent1:'#555',accent2:'#777'};
       const colors=[pal.base,pal.accent1,pal.accent2];
-
       ctx.fillStyle=pal.base;ctx.fillRect(0,0,2500,850);
-      const seed=hashStr((S.line1||S.label||'')+(S.line2||S.headline||'')+patternSeed);
+      const seed=hashStr((S.line1||'')+(S.line2||'')+patternSeed);
       currentPattern=genPattern(seed,colors);
-      for(const s of currentPattern) drawShape(ctx,s);
+      for(const s of currentPattern)drawShape(ctx,s);
       ctx.globalAlpha=1;
-
       ctx.fillStyle='#FFFFFF';ctx.textAlign='center';ctx.textBaseline='top';
-      ctx.font='800 80px "WATCHA Sans OTF"';
-      if('letterSpacing' in ctx)ctx.letterSpacing='-1px';
+      ctx.font='800 80px "WATCHA Sans OTF"';if('letterSpacing' in ctx)ctx.letterSpacing='-1px';
       ctx.fillText(CAT_LABELS[cat],1250,165);
-
-      ctx.font='800 144px "WATCHA Sans OTF"';
-      if('letterSpacing' in ctx)ctx.letterSpacing='-4px';
+      ctx.font='800 144px "WATCHA Sans OTF"';if('letterSpacing' in ctx)ctx.letterSpacing='-4px';
       const title=buildCoverTitle();
       currentTitleLines=title.includes('\n')?title.split('\n').slice(0,2):forceTwoLines(ctx,title,1197);
       currentTitleLines.forEach((line,i)=>ctx.fillText(line,1250,305+i*175));
@@ -326,8 +274,7 @@
     function regenerate(){patternSeed++;renderCover();}
 
     /* ── Downloads ── */
-    function dlPNG(){const c=document.getElementById('cvs'),a=document.createElement('a');a.download=((S.line1||S.label||'cover')+'_'+(S.line2||S.headline||'')).replace(/\s+/g,'_')+'.png';a.href=c.toDataURL('image/png');a.click();}
-
+    function dlPNG(){const c=document.getElementById('cvs'),a=document.createElement('a');a.download=((S.line1||'cover')+'_'+(S.line2||'')).replace(/\s+/g,'_')+'.png';a.href=c.toDataURL('image/png');a.click();}
     function escX(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
     function dlSVG(){
       const pal=selectedPalette||{base:'#333',accent1:'#555',accent2:'#777'};
@@ -335,15 +282,13 @@
       for(const sh of currentPattern)s+=shapeToSVG(sh)+'\n';
       s+=`<text x="1250" y="215" text-anchor="middle" font-family="WATCHA Sans OTF" font-weight="800" font-size="80" letter-spacing="-1" fill="#FFFFFF">${escX(CAT_LABELS[cat])}</text>\n`;
       currentTitleLines.forEach((line,i)=>{s+=`<text x="1250" y="${420+i*175}" text-anchor="middle" font-family="WATCHA Sans OTF" font-weight="800" font-size="144" letter-spacing="-4" fill="#FFFFFF">${escX(line)}</text>\n`;});
-      s+='</svg>';
-      const a=document.createElement('a');a.download=((S.line1||S.label||'cover')+'_'+(S.line2||S.headline||'')).replace(/\s+/g,'_')+'.svg';a.href=URL.createObjectURL(new Blob([s],{type:'image/svg+xml'}));a.click();
+      s+='</svg>';const a=document.createElement('a');a.download=((S.line1||'cover')+'_'+(S.line2||'')).replace(/\s+/g,'_')+'.svg';a.href=URL.createObjectURL(new Blob([s],{type:'image/svg+xml'}));a.click();
     }
 
     function copyAll(btn){
       const pal=selectedPalette||{};
-      const t=[`[Cover]`,`line1: ${S.line1||S.label||''}`,`line2: ${S.line2||S.headline||''}`,`category: ${CAT_LABELS[cat]}`,``,`[Palette]`,`name: ${pal.name||''}`,`base: ${pal.base||''}`,`accent1: ${pal.accent1||''}`,`accent2: ${pal.accent2||''}`].join('\n');
-      navigator.clipboard.writeText(t);
-      const o=btn.innerHTML;btn.textContent='✓ Copied';btn.classList.add('copied');
+      const t=[`[Cover]`,`line1: ${S.line1||''}`,`line2: ${S.line2||''}`,`category: ${CAT_LABELS[cat]}`,``,`[Palette]`,`name: ${pal.name||''}`,`base: ${pal.base||''}`,`accent1: ${pal.accent1||''}`,`accent2: ${pal.accent2||''}`].join('\n');
+      navigator.clipboard.writeText(t);const o=btn.innerHTML;btn.textContent='✓ Copied';btn.classList.add('copied');
       setTimeout(()=>{btn.innerHTML=o;btn.classList.remove('copied');},1500);
     }
 
