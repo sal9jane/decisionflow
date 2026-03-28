@@ -241,48 +241,60 @@
     function mulberry32(seed){return function(){seed|=0;seed=(seed+0x6D2B79F5)|0;let t=Math.imul(seed^(seed>>>15),1|seed);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};}
     function snap(v,g){return Math.round(v/g)*g;}
 
-    /* ── Pattern: 3-zone + crossing beams (CTI style) ── */
+    /* ── Pattern: grid-cell composition with overlap accents ── */
     function genPattern(seed,colors){
       const rand=mulberry32(seed);
       const[base,a1,a2]=colors;
       const shapes=[];
-      const W=2500,H=850,G=50;
-      function pick(){return[base,a1,a2][Math.floor(rand()*3)];}
-      function pickNot(c){let r;do{r=pick();}while(r===c);return r;}
+      const W=2500,H=850;
+      const pal=[base,a1,a2];
 
-      // 1. Background
-      shapes.push({type:'rect',x:0,y:0,w:W,h:H,color:base,opacity:1});
+      // Build column widths (5-7 columns)
+      const nC=5+Math.floor(rand()*3);
+      const colX=[0];
+      for(let i=1;i<nC;i++) colX.push(Math.round(W/nC*i+(rand()-.5)*W/nC*.5));
+      colX.push(W);
 
-      // 2. Left & right margin blocks
-      const lw=snap(400+rand()*350,G);
-      const rw=snap(400+rand()*350,G);
-      const lc=pickNot(base),rc=pickNot(base);
-      shapes.push({type:'rect',x:0,y:0,w:lw,h:H,color:lc,opacity:1});
-      shapes.push({type:'rect',x:W-rw,y:0,w:rw,h:H,color:rc,opacity:1});
+      // Build row heights (3-5 rows)
+      const nR=3+Math.floor(rand()*3);
+      const rowY=[0];
+      for(let i=1;i<nR;i++) rowY.push(Math.round(H/nR*i+(rand()-.5)*H/nR*.4));
+      rowY.push(H);
 
-      // 3. Crossing beams — long narrow triangles edge-to-edge
-      const nBeams=4+Math.floor(rand()*3);
-      for(let i=0;i<nBeams;i++){
-        const fromL=rand()<0.5;
-        const y1=snap(rand()*H,G);
-        const y2=snap(rand()*H,G);
-        const thick=snap(80+rand()*250,G);
-        const c=pick();
-        if(fromL){
-          shapes.push({type:'polygon',points:[[0,y1],[W,y2],[W,Math.min(H,y2+thick)]],color:c,opacity:1});
-        }else{
-          shapes.push({type:'polygon',points:[[W,y1],[0,y2],[0,Math.min(H,y2+thick)]],color:c,opacity:1});
+      // Assign colors to grid cells — no same-color neighbors
+      const grid=[];
+      for(let r=0;r<nR;r++){grid[r]=[];
+        for(let c=0;c<nC;c++){
+          const used=[];
+          if(r>0)used.push(grid[r-1][c]);
+          if(c>0)used.push(grid[r][c-1]);
+          const avail=pal.filter(p=>!used.includes(p));
+          grid[r][c]=avail.length?avail[Math.floor(rand()*avail.length)]:pal[Math.floor(rand()*pal.length)];
         }
       }
 
-      // 4. Small detail blocks in margins
-      for(let i=0;i<2+Math.floor(rand()*3);i++){
-        const bw=snap(60+rand()*180,G);
-        const bh=snap(60+rand()*180,G);
-        const inL=rand()<0.5;
-        const bx=inL?snap(rand()*Math.max(G,lw-bw),G):snap(W-rw+rand()*Math.max(G,rw-bw),G);
-        const by=snap(rand()*Math.max(G,H-bh),G);
-        shapes.push({type:'rect',x:bx,y:by,w:bw,h:bh,color:pick(),opacity:1});
+      // Draw grid cells
+      for(let r=0;r<nR;r++){
+        for(let c=0;c<nC;c++){
+          shapes.push({type:'rect',x:colX[c],y:rowY[r],w:colX[c+1]-colX[c],h:rowY[r+1]-rowY[r],color:grid[r][c],opacity:1});
+        }
+      }
+
+      // Overlay accents — overlapping blocks for depth and richness
+      const nAcc=5+Math.floor(rand()*6);
+      for(let i=0;i<nAcc;i++){
+        const c1=Math.floor(rand()*nC),r1=Math.floor(rand()*nR);
+        // Span 1-2 columns, 1-2 rows
+        const cSpan=Math.min(nC-c1, 1+Math.floor(rand()*2));
+        const rSpan=Math.min(nR-r1, 1+Math.floor(rand()*2));
+        const ax=colX[c1]+Math.round(rand()*(colX[c1+1]-colX[c1])*.3);
+        const ay=rowY[r1]+Math.round(rand()*(rowY[r1+1]-rowY[r1])*.3);
+        const aw=colX[c1+cSpan]-ax-Math.round(rand()*100);
+        const ah=rowY[r1+rSpan]-ay-Math.round(rand()*80);
+        if(aw>50&&ah>50){
+          let color;do{color=pal[Math.floor(rand()*3)];}while(color===grid[r1][c1]);
+          shapes.push({type:'rect',x:ax,y:ay,w:aw,h:ah,color,opacity:1});
+        }
       }
 
       return shapes;
