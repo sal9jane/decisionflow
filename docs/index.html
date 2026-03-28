@@ -241,77 +241,55 @@
     function mulberry32(seed){return function(){seed|=0;seed=(seed+0x6D2B79F5)|0;let t=Math.imul(seed^(seed>>>15),1|seed);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};}
     function snap(v,g){return Math.round(v/g)*g;}
 
-    /* ── Pattern: recursive subdivision tessellation ── */
+    /* ── Pattern: 3-zone + crossing beams (CTI style) ── */
     function genPattern(seed,colors){
       const rand=mulberry32(seed);
       const[base,a1,a2]=colors;
-      const pal=[base,a1,a2];
       const shapes=[];
       const W=2500,H=850,G=50;
+      function pick(){return[base,a1,a2][Math.floor(rand()*3)];}
+      function pickNot(c){let r;do{r=pick();}while(r===c);return r;}
 
-      // Safe zone: center 1280px (x:610-1890), text area y:100-700
-      const SL=610,SR=1890,ST=100,SB=700;
-      function inSafe(x,y,w,h){
-        return x+w>SL && x<SR && y+h>ST && y<SB;
-      }
+      // 1. Background
+      shapes.push({type:'rect',x:0,y:0,w:W,h:H,color:base,opacity:1});
 
-      // Pick a color different from parent
-      function diffColor(parentColor){
-        if(pal.length<2) return pal[0];
-        let c;do{c=pal[Math.floor(rand()*pal.length)];}while(c===parentColor);return c;
-      }
+      // 2. Left & right margin blocks
+      const lw=snap(400+rand()*350,G);
+      const rw=snap(400+rand()*350,G);
+      const lc=pickNot(base),rc=pickNot(base);
+      shapes.push({type:'rect',x:0,y:0,w:lw,h:H,color:lc,opacity:1});
+      shapes.push({type:'rect',x:W-rw,y:0,w:rw,h:H,color:rc,opacity:1});
 
-      // Recursive subdivision — stop earlier in safe zone, alternate colors
-      function subdivide(x,y,w,h,depth,parentColor){
-        const safe=inSafe(x,y,w,h);
-        const minW=safe?400:250, minH=safe?300:180;
-        const stopChance=safe?(depth>1?0.6:0.3):(depth>2?0.35:0);
-        if(w<minW||h<minH||depth>5||rand()<stopChance){
-          const color=diffColor(parentColor);
-          shapes.push({type:'rect',x,y,w,h,color,opacity:1});
-          return;
-        }
-        const thisColor=diffColor(parentColor);
-        const splitV=w/h>1.4?true:h/w>1.4?false:rand()<0.5;
-        if(splitV){
-          const at=snap(x+w*(0.3+rand()*0.4),G);
-          subdivide(x,y,at-x,h,depth+1,thisColor);
-          subdivide(at,y,x+w-at,h,depth+1,thisColor);
+      // 3. Crossing beams — long narrow triangles edge-to-edge
+      const nBeams=4+Math.floor(rand()*3);
+      for(let i=0;i<nBeams;i++){
+        const fromL=rand()<0.5;
+        const y1=snap(rand()*H,G);
+        const y2=snap(rand()*H,G);
+        const thick=snap(80+rand()*250,G);
+        const c=pick();
+        if(fromL){
+          shapes.push({type:'polygon',points:[[0,y1],[W,y2],[W,Math.min(H,y2+thick)]],color:c,opacity:1});
         }else{
-          const at=snap(y+h*(0.3+rand()*0.4),G);
-          subdivide(x,y,w,at-y,depth+1,thisColor);
-          subdivide(x,at,w,y+h-at,depth+1,thisColor);
+          shapes.push({type:'polygon',points:[[W,y1],[0,y2],[0,Math.min(H,y2+thick)]],color:c,opacity:1});
         }
       }
 
-      subdivide(0,0,W,H,0,null);
+      // 4. Center rectangle — LAST, ensures text readability
+      const cx=snap(Math.max(0,lw-80-rand()*50),G);
+      const cw=snap(W-lw-rw+160+rand()*100,G);
+      const cy=snap(30+rand()*40,G);
+      const ch=snap(H-60-rand()*80,G);
+      shapes.push({type:'rect',x:cx,y:cy,w:cw,h:ch,color:pickNot(lc),opacity:1});
 
-      // Diagonal cuts — avoid safe zone, replace ~20-30% of edge blocks
-      const cutRate=0.15+rand()*0.2;
-      const origLen=shapes.length;
-      for(let i=origLen-1;i>=0;i--){
-        const s=shapes[i];
-        const safe=inSafe(s.x,s.y,s.w,s.h);
-        if(s.type==='rect'&&!safe&&rand()<cutRate&&s.w>=200&&s.h>=150){
-          const c2=pal[Math.floor(rand()*pal.length)];
-          const dir=rand()<0.5;// diagonal direction
-          if(dir){
-            shapes[i]={type:'polygon',points:[[s.x,s.y],[s.x+s.w,s.y],[s.x,s.y+s.h]],color:s.color,opacity:1};
-            shapes.push({type:'polygon',points:[[s.x+s.w,s.y],[s.x+s.w,s.y+s.h],[s.x,s.y+s.h]],color:c2,opacity:1});
-          }else{
-            shapes[i]={type:'polygon',points:[[s.x,s.y],[s.x+s.w,s.y],[s.x+s.w,s.y+s.h]],color:s.color,opacity:1};
-            shapes.push({type:'polygon',points:[[s.x,s.y],[s.x+s.w,s.y+s.h],[s.x,s.y+s.h]],color:c2,opacity:1});
-          }
-        }
-      }
-
-      // Circle accents — 1-3 circles, placed outside safe zone
-      const nCirc=1+Math.floor(rand()*3);
-      for(let i=0;i<nCirc;i++){
-        const r=snap(80+rand()*250,G);
-        const cx=rand()<0.5?snap(rand()*500,G):snap(2000+rand()*500,G);
-        const cy=snap(rand()*H,G);
-        shapes.push({type:'circle',x:cx-r,y:cy-r,w:r*2,h:r*2,color:pal[Math.floor(rand()*pal.length)],opacity:1});
+      // 5. Small detail blocks in margins
+      for(let i=0;i<2+Math.floor(rand()*3);i++){
+        const bw=snap(60+rand()*180,G);
+        const bh=snap(60+rand()*180,G);
+        const inL=rand()<0.5;
+        const bx=inL?snap(rand()*Math.max(G,lw-bw),G):snap(W-rw+rand()*Math.max(G,rw-bw),G);
+        const by=snap(rand()*Math.max(G,H-bh),G);
+        shapes.push({type:'rect',x:bx,y:by,w:bw,h:bh,color:pick(),opacity:1});
       }
 
       return shapes;
@@ -335,7 +313,7 @@
 
     /* ── Text ── */
     function wrapText(ctx,text,maxW){const ps=text.split('\n'),lines=[];for(const p of ps){if(!p.trim()){lines.push('');continue;}const ws=p.split(/\s+/).filter(w=>w);let c=ws[0]||'';for(let i=1;i<ws.length;i++){const t=c+' '+ws[i];if(ctx.measureText(t).width>maxW){lines.push(c);c=ws[i];}else c=t;}if(c)lines.push(c);}return lines;}
-    function forceTwoLines(ctx,text,maxW){let lines=wrapText(ctx,text,maxW);if(lines.length===1){const ws=lines[0].split(/\s+/);if(ws.length>=2){const m=Math.ceil(ws.length/2);lines=[ws.slice(0,m).join(' '),ws.slice(m).join(' ')];}else{const m=Math.ceil(text.length/2);lines=[text.slice(0,m),text.slice(mid)];}}if(lines.length>2)lines=[lines[0],lines.slice(1).join(' ')];return lines;}
+    function forceTwoLines(ctx,text,maxW){let lines=wrapText(ctx,text,maxW);if(lines.length===1){const ws=lines[0].split(/\s+/);if(ws.length>=2){const m=Math.ceil(ws.length/2);lines=[ws.slice(0,m).join(' '),ws.slice(m).join(' ')];}else{const m=Math.ceil(text.length/2);lines=[text.slice(0,m),text.slice(m)];}}if(lines.length>2)lines=[lines[0],lines.slice(1).join(' ')];return lines;}
     function buildCoverTitle(){const l1=S.line1||'',l2=S.line2||'';if(l1&&l2)return l1+'\n'+l2;return l1||l2;}
 
     /* ── Render ── */
