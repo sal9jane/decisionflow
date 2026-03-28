@@ -275,14 +275,7 @@
         }
       }
 
-      // 4. Center rectangle — LAST, ensures text readability
-      const cx=snap(Math.max(0,lw-80-rand()*50),G);
-      const cw=snap(W-lw-rw+160+rand()*100,G);
-      const cy=snap(30+rand()*40,G);
-      const ch=snap(H-60-rand()*80,G);
-      shapes.push({type:'rect',x:cx,y:cy,w:cw,h:ch,color:pickNot(lc),opacity:1});
-
-      // 5. Small detail blocks in margins
+      // 4. Small detail blocks in margins
       for(let i=0;i<2+Math.floor(rand()*3);i++){
         const bw=snap(60+rand()*180,G);
         const bh=snap(60+rand()*180,G);
