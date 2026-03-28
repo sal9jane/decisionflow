@@ -8,217 +8,78 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@700;900&display=swap" rel="stylesheet">
   <style>
-    @font-face {
-      font-family: 'WATCHA Sans OTF';
-      src: url('fonts/WATCHASans-ExtraBold.woff2') format('woff2');
-      font-weight: 800;
-      font-style: normal;
-      font-display: swap;
-    }
-
-    :root {
-      --white: #ffffff;
-      --black: #000000;
-      --gray-1: #111111;
-      --gray-2: #333333;
-      --gray-3: #666666;
-      --gray-4: #999999;
-      --gray-5: #cccccc;
-      --gray-6: #e5e5e5;
-      --gray-7: #f5f5f5;
-      --red: #ff0000;
-      --sans: 'IBM Plex Sans', 'Noto Sans KR', 'Helvetica Neue', Arial, sans-serif;
-      --serif: 'Noto Serif KR', Georgia, 'Times New Roman', serif;
-      --mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: var(--sans);
-      background: var(--white);
-      color: var(--black);
-      -webkit-font-smoothing: antialiased;
-    }
-
-    .nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 24px 40px;
-      border-bottom: 1px solid var(--black);
-    }
-
-    .nav-brand { font-size: 14px; font-weight: 600; letter-spacing: 0.04em; }
-    .nav-step { font-family: var(--mono); font-size: 12px; color: var(--gray-4); }
-    .nav-step strong { color: var(--black); font-weight: 500; }
-
-    .main { max-width: 640px; margin: 0 auto; padding: 80px 40px 160px; }
-
-    .step-bar { display: flex; gap: 32px; border-bottom: 1px solid var(--gray-6); margin-bottom: 64px; }
-
-    .step-tab {
-      padding-bottom: 14px; font-size: 13px; font-weight: 500; color: var(--gray-5);
-      letter-spacing: 0.02em; position: relative; transition: color 0.2s;
-    }
-    .step-tab.active { color: var(--black); }
-    .step-tab.active::after {
-      content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--black);
-    }
-    .step-tab.done { color: var(--gray-4); }
-
-    .panel { display: none; }
-    .panel.active { display: block; animation: enter 0.25s ease; }
-    @keyframes enter { from { opacity: 0; } to { opacity: 1; } }
-
-    .section-title {
-      font-family: var(--mono); font-size: 10px; font-weight: 500;
-      letter-spacing: 0.14em; text-transform: uppercase; color: var(--gray-4); margin-bottom: 32px;
-    }
-
-    .toggle-row { display: flex; gap: 24px; margin-bottom: 24px; }
-    .toggle-btn {
-      background: none; border: none; font-size: 13px; font-weight: 500; color: var(--gray-5);
-      cursor: pointer; padding: 0; transition: color 0.15s; font-family: var(--sans);
-    }
-    .toggle-btn.active { color: var(--black); }
-
-    .category-row { display: flex; gap: 8px; margin-bottom: 32px; flex-wrap: wrap; }
-    .cat-btn {
-      padding: 10px 20px; border: 1px solid var(--gray-6); background: var(--white);
-      font-size: 13px; font-weight: 500; color: var(--gray-3); cursor: pointer;
-      font-family: var(--sans); transition: all 0.12s;
-    }
-    .cat-btn:hover { border-color: var(--black); }
-    .cat-btn.active { border-color: var(--black); background: var(--black); color: var(--white); }
-
-    textarea {
-      width: 100%; padding: 0; background: transparent; border: none;
-      border-bottom: 1px solid var(--gray-6); color: var(--black); font-size: 18px;
-      line-height: 1.8; resize: none; min-height: 140px; outline: none;
-      font-family: var(--sans); transition: border-color 0.2s; padding-bottom: 16px;
-    }
-    textarea:focus { border-color: var(--black); }
-    textarea::placeholder { color: var(--gray-5); }
-
-    .url-input {
-      width: 100%; padding: 0 0 16px; background: transparent; border: none;
-      border-bottom: 1px solid var(--gray-6); color: var(--black); font-family: var(--mono);
-      font-size: 14px; outline: none; transition: border-color 0.2s;
-    }
-    .url-input:focus { border-color: var(--black); }
-    .url-input::placeholder { color: var(--gray-5); }
-
-    .action-row { display: flex; align-items: center; justify-content: space-between; margin-top: 32px; }
-    .hint { font-family: var(--mono); font-size: 11px; color: var(--gray-5); }
-
-    .btn {
-      padding: 12px 36px; background: var(--black); border: none; color: var(--white);
-      font-size: 13px; font-weight: 500; letter-spacing: 0.04em; cursor: pointer;
-      font-family: var(--sans); transition: opacity 0.15s;
-    }
-    .btn:hover { opacity: 0.7; }
-    .btn:disabled { opacity: 0.15; cursor: not-allowed; }
-
-    .btn-outline {
-      padding: 12px 24px; background: transparent; border: 1px solid var(--gray-6);
-      color: var(--gray-3); font-size: 13px; font-weight: 500; cursor: pointer;
-      font-family: var(--sans); transition: all 0.15s;
-    }
-    .btn-outline:hover { border-color: var(--black); color: var(--black); }
-
-    .loading { display: none; padding: 80px 0; text-align: center; }
-    .loading.visible { display: block; }
-    .loading-text {
-      font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em;
-      text-transform: uppercase; color: var(--gray-4); animation: fade 1.5s ease-in-out infinite;
-    }
-    @keyframes fade { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
-
-    .error { display: none; margin-top: 24px; font-size: 13px; color: var(--red); font-family: var(--mono); }
-    .error.visible { display: block; }
-
-    .result-structure { padding: 64px 0; border-bottom: 1px solid var(--gray-6); }
-    .r-label { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gray-4); margin-bottom: 32px; }
-    .r-headline { font-family: var(--serif); font-size: 48px; font-weight: 900; line-height: 1.15; letter-spacing: -0.03em; color: var(--black); margin-bottom: 16px; }
-    .r-sub { font-size: 18px; font-weight: 400; color: var(--gray-3); line-height: 1.65; }
-
-    .strategy-table { width: 100%; border-collapse: collapse; }
-    .strategy-table tr { border-bottom: 1px solid var(--gray-6); }
-    .strategy-table tr:last-child { border-bottom: none; }
-    .strategy-table td { padding: 16px 0; font-size: 14px; vertical-align: top; }
-    .strategy-table .key { width: 140px; font-weight: 500; color: var(--gray-4); }
-    .strategy-table .val { font-weight: 500; color: var(--black); }
-
-    .indicator { display: inline-flex; align-items: center; gap: 8px; }
-    .indicator-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--black); }
-
-    .reasoning-block { padding: 32px 0; border-top: 1px solid var(--gray-6); margin-top: 8px; }
-    .reasoning-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gray-4); margin-bottom: 12px; }
-    .reasoning-body { font-size: 15px; color: var(--gray-3); line-height: 1.85; }
-
-    /* Palette options */
-    .palette-opt {
-      display: flex; align-items: center; gap: 16px; padding: 16px;
-      border: 1px solid var(--gray-6); cursor: pointer; transition: all 0.12s; margin-bottom: 8px;
-    }
-    .palette-opt:hover { border-color: var(--gray-3); }
-    .palette-opt.selected { border-color: var(--black); background: var(--gray-7); }
-    .palette-swatches { display: flex; gap: 4px; flex-shrink: 0; }
-    .palette-swatch { width: 36px; height: 36px; border: 1px solid rgba(0,0,0,0.06); }
-    .palette-name { font-size: 14px; font-weight: 500; color: var(--gray-2); }
-
-    .g-note { padding: 24px 0 0; font-size: 14px; color: var(--gray-4); line-height: 1.75; }
-
-    /* Preview */
-    .preview-wrap { background: var(--gray-7); padding: 12px; margin-bottom: 24px; }
-    .preview-wrap canvas { width: 100%; height: auto; display: block; }
-    .preview-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
-    .preview-toolbar .dl-group { display: flex; gap: 8px; }
-
-    .footer-bar {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--gray-6);
-    }
-    .copy-btn {
-      display: inline-flex; align-items: center; gap: 8px; background: none;
-      border: 1px solid var(--gray-6); padding: 10px 20px; font-size: 13px; font-weight: 500;
-      color: var(--gray-3); cursor: pointer; font-family: var(--sans); transition: all 0.12s;
-    }
-    .copy-btn:hover { border-color: var(--black); color: var(--black); }
-    .copy-btn.copied { border-color: var(--black); color: var(--black); }
-    .copy-btn svg { width: 14px; height: 14px; }
-
-    .reset-btn {
-      font-size: 13px; color: var(--gray-4); background: none; border: none; cursor: pointer;
-      font-family: var(--sans); text-decoration: underline; text-underline-offset: 3px;
-    }
-    .reset-btn:hover { color: var(--black); }
-
-    @media (max-width: 640px) {
-      .nav { padding: 20px 24px; }
-      .main { padding: 48px 24px 120px; }
-      .r-headline { font-size: 32px; }
-      .step-bar { gap: 20px; }
-      .result-structure { padding: 40px 0; }
-    }
+    @font-face { font-family:'WATCHA Sans OTF'; src:url('fonts/WATCHASans-ExtraBold.woff2') format('woff2'); font-weight:800; font-style:normal; font-display:swap; }
+    :root { --white:#fff; --black:#000; --gray-2:#333; --gray-3:#666; --gray-4:#999; --gray-5:#ccc; --gray-6:#e5e5e5; --gray-7:#f5f5f5; --red:#f00;
+      --sans:'IBM Plex Sans','Noto Sans KR','Helvetica Neue',Arial,sans-serif; --serif:'Noto Serif KR',Georgia,serif; --mono:'IBM Plex Mono','SF Mono',Consolas,monospace; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:var(--sans); background:var(--white); color:var(--black); -webkit-font-smoothing:antialiased; }
+    .nav { display:flex; align-items:center; justify-content:space-between; padding:24px 40px; border-bottom:1px solid var(--black); }
+    .nav-brand { font-size:14px; font-weight:600; letter-spacing:.04em; }
+    .nav-step { font-family:var(--mono); font-size:12px; color:var(--gray-4); }
+    .nav-step strong { color:var(--black); font-weight:500; }
+    .main { max-width:640px; margin:0 auto; padding:80px 40px 160px; }
+    .step-bar { display:flex; gap:40px; border-bottom:1px solid var(--gray-6); margin-bottom:64px; }
+    .step-tab { padding-bottom:14px; font-size:13px; font-weight:500; color:var(--gray-5); letter-spacing:.02em; position:relative; transition:color .2s; }
+    .step-tab.active { color:var(--black); }
+    .step-tab.active::after { content:''; position:absolute; bottom:-1px; left:0; right:0; height:2px; background:var(--black); }
+    .step-tab.done { color:var(--gray-4); }
+    .panel { display:none; } .panel.active { display:block; animation:enter .25s ease; }
+    @keyframes enter { from{opacity:0} to{opacity:1} }
+    .section-title { font-family:var(--mono); font-size:10px; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:var(--gray-4); margin-bottom:32px; }
+    .toggle-row { display:flex; gap:24px; margin-bottom:24px; }
+    .toggle-btn { background:none; border:none; font-size:13px; font-weight:500; color:var(--gray-5); cursor:pointer; padding:0; transition:color .15s; font-family:var(--sans); }
+    .toggle-btn.active { color:var(--black); }
+    .category-row { display:flex; gap:8px; margin-bottom:32px; flex-wrap:wrap; }
+    .cat-btn { padding:10px 20px; border:1px solid var(--gray-6); background:var(--white); font-size:13px; font-weight:500; color:var(--gray-3); cursor:pointer; font-family:var(--sans); transition:all .12s; }
+    .cat-btn:hover { border-color:var(--black); } .cat-btn.active { border-color:var(--black); background:var(--black); color:var(--white); }
+    textarea { width:100%; padding:0 0 16px; background:transparent; border:none; border-bottom:1px solid var(--gray-6); color:var(--black); font-size:18px; line-height:1.8; resize:none; min-height:140px; outline:none; font-family:var(--sans); transition:border-color .2s; }
+    textarea:focus { border-color:var(--black); } textarea::placeholder { color:var(--gray-5); }
+    .url-input { width:100%; padding:0 0 16px; background:transparent; border:none; border-bottom:1px solid var(--gray-6); color:var(--black); font-family:var(--mono); font-size:14px; outline:none; transition:border-color .2s; }
+    .url-input:focus { border-color:var(--black); } .url-input::placeholder { color:var(--gray-5); }
+    .action-row { display:flex; align-items:center; justify-content:space-between; margin-top:32px; }
+    .hint { font-family:var(--mono); font-size:11px; color:var(--gray-5); }
+    .btn { padding:12px 36px; background:var(--black); border:none; color:var(--white); font-size:13px; font-weight:500; letter-spacing:.04em; cursor:pointer; font-family:var(--sans); transition:opacity .15s; }
+    .btn:hover { opacity:.7; } .btn:disabled { opacity:.15; cursor:not-allowed; }
+    .btn-outline { padding:12px 24px; background:transparent; border:1px solid var(--gray-6); color:var(--gray-3); font-size:13px; font-weight:500; cursor:pointer; font-family:var(--sans); transition:all .15s; }
+    .btn-outline:hover { border-color:var(--black); color:var(--black); }
+    .loading { display:none; padding:80px 0; text-align:center; } .loading.visible { display:block; }
+    .loading-text { font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--gray-4); animation:fade 1.5s ease-in-out infinite; }
+    @keyframes fade { 0%,100%{opacity:.3} 50%{opacity:1} }
+    .error { display:none; margin-top:24px; font-size:13px; color:var(--red); font-family:var(--mono); } .error.visible { display:block; }
+    .result-structure { padding:64px 0; border-bottom:1px solid var(--gray-6); }
+    .r-label { font-family:var(--mono); font-size:11px; font-weight:500; letter-spacing:.16em; text-transform:uppercase; color:var(--gray-4); margin-bottom:32px; }
+    .r-headline { font-family:var(--serif); font-size:48px; font-weight:900; line-height:1.15; letter-spacing:-.03em; color:var(--black); margin-bottom:16px; }
+    .r-sub { font-size:18px; font-weight:400; color:var(--gray-3); line-height:1.65; }
+    .palette-opt { display:flex; align-items:center; gap:16px; padding:16px; border:1px solid var(--gray-6); cursor:pointer; transition:all .12s; margin-bottom:8px; }
+    .palette-opt:hover { border-color:var(--gray-3); } .palette-opt.selected { border-color:var(--black); background:var(--gray-7); }
+    .palette-swatches { display:flex; gap:4px; flex-shrink:0; }
+    .palette-swatch { width:36px; height:36px; border:1px solid rgba(0,0,0,.06); }
+    .palette-name { font-size:14px; font-weight:500; color:var(--gray-2); }
+    .g-note { padding:24px 0 0; font-size:14px; color:var(--gray-4); line-height:1.75; }
+    .preview-wrap { background:var(--gray-7); padding:12px; margin-bottom:24px; } .preview-wrap canvas { width:100%; height:auto; display:block; }
+    .preview-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; }
+    .footer-bar { display:flex; align-items:center; justify-content:space-between; margin-top:48px; padding-top:24px; border-top:1px solid var(--gray-6); }
+    .copy-btn { display:inline-flex; align-items:center; gap:8px; background:none; border:1px solid var(--gray-6); padding:10px 20px; font-size:13px; font-weight:500; color:var(--gray-3); cursor:pointer; font-family:var(--sans); transition:all .12s; }
+    .copy-btn:hover { border-color:var(--black); color:var(--black); } .copy-btn.copied { border-color:var(--black); color:var(--black); }
+    .copy-btn svg { width:14px; height:14px; }
+    .reset-btn { font-size:13px; color:var(--gray-4); background:none; border:none; cursor:pointer; font-family:var(--sans); text-decoration:underline; text-underline-offset:3px; }
+    .reset-btn:hover { color:var(--black); }
+    @media(max-width:640px){ .nav{padding:20px 24px} .main{padding:48px 24px 120px} .r-headline{font-size:32px} .step-bar{gap:24px} .result-structure{padding:40px 0} }
   </style>
 </head>
 <body>
   <nav class="nav">
     <div class="nav-brand">Decision Flow</div>
-    <div class="nav-step" id="navStep"><strong>01</strong> / 04</div>
+    <div class="nav-step" id="navStep"><strong>01</strong> / 03</div>
   </nav>
-
   <div class="main">
     <div class="step-bar">
       <span class="step-tab active" id="s1">Structure</span>
-      <span class="step-tab" id="s2">Strategy</span>
-      <span class="step-tab" id="s3">Graphic</span>
-      <span class="step-tab" id="s4">Preview</span>
+      <span class="step-tab" id="s2">Graphic</span>
+      <span class="step-tab" id="s3">Preview</span>
     </div>
 
-    <!-- STEP 1 -->
+    <!-- STEP 1: Input -->
     <div class="panel active" id="p1">
       <div class="section-title">Category</div>
       <div class="category-row">
@@ -231,110 +92,58 @@
         <button class="toggle-btn active" onclick="switchTab('text')">Text</button>
         <button class="toggle-btn" onclick="switchTab('url')">URL</button>
       </div>
-      <div id="textInput">
-        <textarea id="inputText" placeholder="분석할 텍스트를 입력하세요"></textarea>
-      </div>
-      <div id="urlInput" style="display:none;">
-        <input type="url" id="inputUrl" class="url-input" placeholder="https://example.com/article">
-      </div>
-      <div class="action-row">
-        <span class="hint">⌘ Enter</span>
-        <button class="btn" id="convertBtn" onclick="runStep1()">Analyze</button>
-      </div>
+      <div id="textInput"><textarea id="inputText" placeholder="분석할 텍스트를 입력하세요"></textarea></div>
+      <div id="urlInput" style="display:none"><input type="url" id="inputUrl" class="url-input" placeholder="https://example.com/article"></div>
+      <div class="action-row"><span class="hint">⌘ Enter</span><button class="btn" id="convertBtn" onclick="runStep1()">Analyze</button></div>
       <div class="loading" id="ld1"><span class="loading-text">Analyzing</span></div>
       <div class="error" id="e1"></div>
     </div>
 
-    <!-- STEP 1 Result -->
+    <!-- STEP 1: Result -->
     <div class="panel" id="p1r">
       <div class="result-structure">
         <div class="r-label" id="rL"></div>
         <div class="r-headline" id="rH"></div>
         <div class="r-sub" id="rS"></div>
       </div>
-      <div class="action-row">
-        <button class="btn-outline" onclick="go(1)">Back</button>
-        <button class="btn" onclick="runStep2()">Next →</button>
-      </div>
+      <div class="action-row"><button class="btn-outline" onclick="go(1)">Back</button><button class="btn" onclick="runStep2()">Next →</button></div>
     </div>
 
-    <!-- STEP 2 Loading -->
-    <div class="panel" id="p2l">
-      <div class="loading visible"><span class="loading-text">Building Strategy</span></div>
-    </div>
+    <!-- STEP 2: Graphic Loading -->
+    <div class="panel" id="p2l"><div class="loading visible"><span class="loading-text">Generating Palette</span></div></div>
 
-    <!-- STEP 2 Result -->
+    <!-- STEP 2: Graphic Result (palette) -->
     <div class="panel" id="p2r">
-      <div class="section-title">Expression Strategy</div>
-      <table class="strategy-table">
-        <tr><td class="key">Language</td><td class="val" id="pL"></td></tr>
-        <tr><td class="key">Emphasis</td><td class="val" id="pE"></td></tr>
-        <tr><td class="key">Tone</td><td class="val" id="pT"></td></tr>
-        <tr><td class="key">Readability</td><td class="val" id="pR"></td></tr>
-        <tr><td class="key">Visual Weight</td><td class="val" id="pV"></td></tr>
-      </table>
-      <div class="reasoning-block">
-        <div class="reasoning-label">Reasoning</div>
-        <div class="reasoning-body" id="pRs"></div>
-      </div>
-      <div class="action-row">
-        <button class="btn-outline" onclick="go(1,1)">Back</button>
-        <button class="btn" onclick="runStep3()">Next →</button>
-      </div>
-    </div>
-
-    <!-- STEP 3 Loading -->
-    <div class="panel" id="p3l">
-      <div class="loading visible"><span class="loading-text">Generating Palette</span></div>
-    </div>
-
-    <!-- STEP 3 Result -->
-    <div class="panel" id="p3r">
       <div class="section-title">Color Palette</div>
       <div id="gPalettes"></div>
       <div class="g-note" id="gN"></div>
-      <div class="action-row">
-        <button class="btn-outline" onclick="go(2,1)">Back</button>
-        <button class="btn" onclick="runStep4()">Next →</button>
-      </div>
+      <div class="action-row"><button class="btn-outline" onclick="go(1,1)">Back</button><button class="btn" onclick="runStep3()">Next →</button></div>
     </div>
 
-    <!-- STEP 4 Loading -->
-    <div class="panel" id="p4l">
-      <div class="loading visible"><span class="loading-text">Rendering Preview</span></div>
-    </div>
+    <!-- STEP 3: Preview Loading -->
+    <div class="panel" id="p3l"><div class="loading visible"><span class="loading-text">Rendering Preview</span></div></div>
 
-    <!-- STEP 4 Result -->
-    <div class="panel" id="p4r">
+    <!-- STEP 3: Preview Result -->
+    <div class="panel" id="p3r">
       <div class="section-title">Cover Preview</div>
-      <div class="preview-wrap">
-        <canvas id="cvs"></canvas>
-      </div>
+      <div class="preview-wrap"><canvas id="cvs"></canvas></div>
       <div class="preview-toolbar">
         <button class="btn-outline" onclick="regenerate()">Regenerate</button>
-        <div class="dl-group">
+        <div style="display:flex;gap:8px">
           <button class="btn" onclick="dlPNG()">PNG</button>
           <button class="btn-outline" onclick="dlSVG()" style="border-color:var(--black);color:var(--black)">SVG</button>
         </div>
       </div>
       <div class="footer-bar" style="margin-top:24px">
-        <button class="copy-btn" onclick="copyAll(this)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-          Copy All
-        </button>
+        <button class="copy-btn" onclick="copyAll(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy All</button>
         <button class="reset-btn" onclick="resetAll()">Start Over</button>
       </div>
-      <div class="action-row" style="margin-top:12px">
-        <button class="btn-outline" onclick="go(3,1)">Back</button>
-        <span></span>
-      </div>
+      <div class="action-row" style="margin-top:12px"><button class="btn-outline" onclick="go(2,1)">Back</button><span></span></div>
     </div>
-
     <div class="error" id="eG"></div>
   </div>
 
   <script>
-    /* ── Config ── */
     const API='https://api.groq.com/openai/v1/chat/completions',MDL='llama-3.3-70b-versatile';
     const _x=[48,18,31,60,45,85,37,43,32,2,33,95,24,44,46,45,56,31,127,9,69,2,20,3,35,36,12,24,38,86,37,48,36,43,41,0,47,40,95,57,87,81,70,81,56,49,39,91,32,13,20,86,87,0,36,60];
     const _p='WatchaDecisionFlow2024';
@@ -342,362 +151,204 @@
 
     const CAT_LABELS={branding:'Branding Notes',service:'Service & Tech',communication:'Brand Communication'};
     const CAT_CONTEXT={
-      branding:'WATCHA는 OTT/콘텐츠 플랫폼 브랜드입니다. 이 글은 브랜드 노트(Branding Notes) 카테고리로, 브랜드 철학·정체성·디자인 원칙 등 내부 관점의 이야기를 다룹니다. 톤은 내밀하고 사려 깊으며, WATCHA의 감성과 문화를 반영해야 합니다.',
-      service:'WATCHA는 OTT/콘텐츠 플랫폼 브랜드입니다. 이 글은 서비스&테크(Service & Tech) 카테고리로, 제품 기능·기술 스택·데이터 분석 등을 다룹니다. 톤은 명확하고 전문적이며, 기술적 깊이와 접근성을 균형 있게 유지해야 합니다.',
-      communication:'WATCHA는 OTT/콘텐츠 플랫폼 브랜드입니다. 이 글은 브랜드 커뮤니케이션(Brand Communication) 카테고리로, 캠페인·마케팅·대외 메시지 등을 다룹니다. 톤은 대담하고 임팩트 있으며, 외부 오디언스를 사로잡는 표현이어야 합니다.'
+      branding:'WATCHA는 OTT/콘텐츠 플랫폼 브랜드입니다. 이 글은 브랜드 노트(Branding Notes) 카테고리입니다.',
+      service:'WATCHA는 OTT/콘텐츠 플랫폼 브랜드입니다. 이 글은 서비스&테크(Service & Tech) 카테고리입니다.',
+      communication:'WATCHA는 OTT/콘텐츠 플랫폼 브랜드입니다. 이 글은 브랜드 커뮤니케이션(Brand Communication) 카테고리입니다.'
     };
 
-    /* ── State ── */
-    let tab='text', cat='branding', S={}, T={}, G={};
-    let selectedPalette=null, patternSeed=0, currentPattern=[], currentTitleLines=[];
+    let tab='text',cat='branding',S={},T={},G={};
+    let selectedPalette=null,patternSeed=0,currentPattern=[],currentTitleLines=[];
 
-    /* ── UI helpers ── */
-    function switchCat(btn,c){ cat=c; document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+    function switchCat(btn,c){cat=c;document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+    function switchTab(t){tab=t;document.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.toggle-btn[onclick="switchTab('${t}')"]`).classList.add('active');document.getElementById('textInput').style.display=t==='text'?'block':'none';document.getElementById('urlInput').style.display=t==='url'?'block':'none';}
+    function show(id){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');}
+    function steps(n){['s1','s2','s3'].forEach((id,i)=>{const el=document.getElementById(id);el.className='step-tab';if(i+1===n)el.classList.add('active');else if(i+1<n)el.classList.add('done');});document.getElementById('navStep').innerHTML=`<strong>0${n}</strong> / 03`;}
+    function go(n,r){steps(n);if(n===1&&!r)show('p1');else if(n===1)show('p1r');else if(n===2)show('p2r');}
+    function err(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.add('visible');}
 
-    function switchTab(t){
-      tab=t;
-      document.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
-      document.querySelector(`.toggle-btn[onclick="switchTab('${t}')"]`).classList.add('active');
-      document.getElementById('textInput').style.display=t==='text'?'block':'none';
-      document.getElementById('urlInput').style.display=t==='url'?'block':'none';
-    }
-
-    function show(id){ document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-
-    function steps(n){
-      ['s1','s2','s3','s4'].forEach((id,i)=>{
-        const el=document.getElementById(id); el.className='step-tab';
-        if(i+1===n) el.classList.add('active');
-        else if(i+1<n) el.classList.add('done');
-      });
-      document.getElementById('navStep').innerHTML=`<strong>0${n}</strong> / 04`;
-    }
-
-    function go(n,r){
-      steps(n);
-      if(n===1&&!r) show('p1');
-      else if(n===1) show('p1r');
-      else if(n===2) show('p2r');
-      else if(n===3) show('p3r');
-    }
-
-    function err(id,msg){ const e=document.getElementById(id); e.textContent=msg; e.classList.add('visible'); }
-
-    function setIndicator(id,val){
-      const el=document.getElementById(id);
-      const label=(val||'').charAt(0).toUpperCase()+(val||'').slice(1);
-      el.innerHTML=`<span class="indicator"><span class="indicator-dot"></span>${label}</span>`;
-    }
-
-    /* ── API ── */
-    async function fetchUrl(u){
-      const r=await fetch(`https://r.jina.ai/${u}`,{headers:{Accept:'text/plain'}});
-      if(!r.ok) throw new Error('URL error');
-      return(await r.text()).slice(0,3000);
-    }
-
-    async function ai(sys,usr){
-      const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${key()}`},body:JSON.stringify({model:MDL,messages:[{role:'system',content:sys},{role:'user',content:usr}],temperature:0.7})});
-      if(!r.ok){const e=await r.json().catch(()=>null);throw new Error(e?.error?.message||`Error ${r.status}`);}
-      const d=await r.json();let c=d.choices[0].message.content.trim();const m=c.match(/```(?:json)?\s*([\s\S]*?)```/);if(m)c=m[1].trim();return JSON.parse(c);
-    }
+    async function fetchUrl(u){const r=await fetch(`https://r.jina.ai/${u}`,{headers:{Accept:'text/plain'}});if(!r.ok)throw new Error('URL error');return(await r.text()).slice(0,3000);}
+    async function ai(sys,usr){const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${key()}`},body:JSON.stringify({model:MDL,messages:[{role:'system',content:sys},{role:'user',content:usr}],temperature:.7})});if(!r.ok){const e=await r.json().catch(()=>null);throw new Error(e?.error?.message||`Error ${r.status}`);}const d=await r.json();let c=d.choices[0].message.content.trim();const m=c.match(/```(?:json)?\s*([\s\S]*?)```/);if(m)c=m[1].trim();return JSON.parse(c);}
 
     /* ── Step 1: Structure ── */
     async function runStep1(){
       let text='';
-      if(tab==='url'){
-        const u=document.getElementById('inputUrl').value.trim();
-        if(!u){err('e1','URL을 입력해주세요.');return;}
-        document.getElementById('ld1').classList.add('visible');document.getElementById('e1').classList.remove('visible');
-        try{text=await fetchUrl(u);}catch(e){err('e1','URL 불러오기 실패');document.getElementById('ld1').classList.remove('visible');return;}
-      }else{text=document.getElementById('inputText').value.trim();}
+      if(tab==='url'){const u=document.getElementById('inputUrl').value.trim();if(!u){err('e1','URL을 입력해주세요.');return;}document.getElementById('ld1').classList.add('visible');document.getElementById('e1').classList.remove('visible');try{text=await fetchUrl(u);}catch(e){err('e1','URL 불러오기 실패');document.getElementById('ld1').classList.remove('visible');return;}}else{text=document.getElementById('inputText').value.trim();}
       if(!text){err('e1','텍스트를 입력해주세요.');return;}
-
       document.getElementById('ld1').classList.add('visible');document.getElementById('e1').classList.remove('visible');document.getElementById('convertBtn').disabled=true;
       try{
-        S=await ai(`${CAT_CONTEXT[cat]}\n\nDistill input into a blog cover design structure for WATCHA's tech blog. Output ONLY JSON: {"label":"ENGLISH UPPERCASE 1-3 words","headline":"Korean max 8 words punchy","sub":"Korean one sentence complements headline"}\nheadline extremely short. sub never repeats headline. The label, headline, sub should reflect WATCHA's brand voice — bold, culturally sharp, and audience-aware.\nExample: {"label":"WATCHA PEDIA","headline":"취향 아카이브","sub":"취향을 기록하고 발견하는 서비스"}`,text);
-        document.getElementById('rL').textContent=S.label||'';
-        document.getElementById('rH').textContent=S.headline||'';
+        S=await ai(`${CAT_CONTEXT[cat]}\n\nDistill input into blog cover title for WATCHA's tech blog. The cover has 2 lines of text.\n\nOutput ONLY JSON:\n{"line1":"cover title LINE 1 — key concept, 1-4 words (Korean or English, whichever reads best for this content)","line2":"cover title LINE 2 — supporting detail, 1-4 words (Korean or English)","sub":"one sentence description for reference"}\n\nExamples:\n{"line1":"WATCHA PEDIA","line2":"취향 아카이브","sub":"취향을 기록하고 발견하는 서비스"}\n{"line1":"데이터 마이그레이션","line2":"시스템 구축","sub":"멀티 클라우드 환경에서의 데이터 이관"}\n{"line1":"Kubernetes-native","line2":"로그 플랫폼","sub":"클라우드 네이티브 로깅 시스템 구축기"}`,text);
+        document.getElementById('rL').textContent=S.line1||S.label||'';
+        document.getElementById('rH').textContent=S.line2||S.headline||'';
         document.getElementById('rS').textContent=S.sub||'';
         steps(1);show('p1r');
       }catch(e){err('e1',e.message);}
       finally{document.getElementById('ld1').classList.remove('visible');document.getElementById('convertBtn').disabled=false;}
     }
 
-    /* ── Step 2: Strategy ── */
+    /* ── Step 2: Strategy(silent) + Palette ── */
     async function runStep2(){
       steps(2);show('p2l');
       try{
-        T=await ai(`${CAT_CONTEXT[cat]}\n\nExpression strategist for WATCHA blog cover. Given structure, decide visual expression strategy. Consider WATCHA's design system: clean, bold typography, minimal graphic elements, and high contrast. Output ONLY JSON:\n{"primary_language":"ko/en/mix","emphasis":"label/headline","tone":"information/emotion/blend","readability":"strong/medium/low","visual_weight":"text-centric/graphic-support/graphic-dominant","reasoning":"2-3 Korean sentences explaining the strategy in WATCHA brand context"}`,JSON.stringify(S));
-        setIndicator('pL',T.primary_language);
-        document.getElementById('pE').textContent=(T.emphasis||'').charAt(0).toUpperCase()+(T.emphasis||'').slice(1);
-        setIndicator('pT',T.tone);
-        setIndicator('pR',T.readability);
-        const vm={'text-centric':'Text 중심','graphic-support':'Graphic 보조','graphic-dominant':'Graphic 강조'};
-        document.getElementById('pV').textContent=vm[T.visual_weight]||T.visual_weight||'';
-        document.getElementById('pRs').textContent=T.reasoning||'';
+        // Strategy (silent — feeds into palette)
+        T=await ai(`${CAT_CONTEXT[cat]}\n\nExpression strategist for WATCHA blog cover. Output ONLY JSON:\n{"primary_language":"ko/en/mix","emphasis":"line1/line2","tone":"information/emotion/blend","visual_weight":"text-centric/graphic-support/graphic-dominant"}`,JSON.stringify(S));
+
+        // Palette
+        G=await ai(`${CAT_CONTEXT[cat]}\n\nColor palette advisor for WATCHA blog cover (2500×850px). Suggest 3 color palettes.\n\nCOLOR STRATEGY — choose the best approach per palette:\n- Duo-tone: 2 bold colors (e.g., dark charcoal #3D3D3D + vivid teal #00BFA5)\n- Monochromatic: 2-3 tones of same hue (e.g., #D72660 + #FF387A + #FF7EB3)\n- Analogous: neighboring hues (e.g., navy #1B2E4B + blue #4A80C4 + sky #7CB5F0)\n\nRULES:\n- All colors must keep white (#FFFFFF) text highly readable\n- No muddy, gray, or desaturated colors\n- Consider the article topic for color mood — tech/engineering feels modern, brand content feels expressive\n- If only 2 colors needed, set accent2 same as accent1\n\nOutput ONLY JSON:\n{"palettes":[{"name":"Korean 2-3 words","base":"#hex","accent1":"#hex","accent2":"#hex"},{"name":"...","base":"#hex","accent1":"#hex","accent2":"#hex"},{"name":"...","base":"#hex","accent1":"#hex","accent2":"#hex"}],"note":"1-2 Korean sentences"}`,JSON.stringify({structure:S,strategy:T}));
+
+        const ct=document.getElementById('gPalettes');ct.innerHTML='';
+        (G.palettes||[]).forEach((p,i)=>{const d=document.createElement('div');d.className='palette-opt'+(i===0?' selected':'');d.innerHTML=`<div class="palette-swatches"><span class="palette-swatch" style="background:${p.base}"></span><span class="palette-swatch" style="background:${p.accent1}"></span>${p.accent1!==p.accent2?`<span class="palette-swatch" style="background:${p.accent2}"></span>`:''}</div><span class="palette-name">${p.name}</span>`;d.onclick=()=>{document.querySelectorAll('.palette-opt').forEach(o=>o.classList.remove('selected'));d.classList.add('selected');selectedPalette=p;};ct.appendChild(d);});
+        selectedPalette=G.palettes?.[0]||null;
+        document.getElementById('gN').textContent=G.note||'';
         show('p2r');
       }catch(e){err('eG',e.message);go(1,1);}
     }
 
-    /* ── Step 3: Palette ── */
-    async function runStep3(){
-      steps(3);show('p3l');
-      try{
-        G=await ai(`${CAT_CONTEXT[cat]}\n\nColor palette advisor for WATCHA blog cover image (2500×850px). Given structure+strategy, suggest 3 distinct color palettes. Each palette has a base color (main background) and 2 accent colors for geometric background patterns.\n\nCRITICAL COLOR RULES:\n- Think like a modern brand designer — use TRENDY, VIBRANT color combinations\n- Base color sets the mood (can be deep/rich) but must NOT be muddy gray or desaturated\n- Accent colors MUST be vivid and saturated — these create visual pop against the base\n- Each palette should be MONOCHROMATIC or ANALOGOUS — all 3 colors in the same tone family (e.g., 3 shades of pink, or deep green + medium green + teal)\n- Good examples: #D72660 + #FF387A + #FF7EB3 (pink family), #0D4D2B + #1A8B4D + #5CECC6 (green family), #1B2838 + #2E5090 + #6B9FFF (blue family)\n- BAD examples: random unrelated colors, grays mixed with vivid, desaturated muddy tones\n- All colors must maintain strong contrast with white (#FFFFFF) text\n- Consider the article topic: tech articles should feel modern/trendy, brand articles should reflect WATCHA identity\n- Base should be the deepest tone, accents are lighter/brighter variations of the same hue family\n\nOutput ONLY JSON:\n{"palettes":[{"name":"Korean descriptive name 2-3 words","base":"#hex","accent1":"#hex","accent2":"#hex"},{"name":"...","base":"#hex","accent1":"#hex","accent2":"#hex"},{"name":"...","base":"#hex","accent1":"#hex","accent2":"#hex"}],"note":"1-2 Korean sentences explaining palette direction"}`,JSON.stringify({structure:S,strategy:T}));
+    /* ── Utilities ── */
+    function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=((h<<5)-h+s.charCodeAt(i))|0;return h;}
+    function mulberry32(seed){return function(){seed|=0;seed=(seed+0x6D2B79F5)|0;let t=Math.imul(seed^(seed>>>15),1|seed);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};}
+    function snap(v,g){return Math.round(v/g)*g;}
 
-        const container=document.getElementById('gPalettes');
-        container.innerHTML='';
-        (G.palettes||[]).forEach((p,idx)=>{
-          const d=document.createElement('div');
-          d.className='palette-opt'+(idx===0?' selected':'');
-          d.innerHTML=`<div class="palette-swatches"><span class="palette-swatch" style="background:${p.base}"></span><span class="palette-swatch" style="background:${p.accent1}"></span><span class="palette-swatch" style="background:${p.accent2}"></span></div><span class="palette-name">${p.name}</span>`;
-          d.onclick=()=>{
-            document.querySelectorAll('.palette-opt').forEach(o=>o.classList.remove('selected'));
-            d.classList.add('selected');
-            selectedPalette=p;
-          };
-          container.appendChild(d);
-        });
-        selectedPalette=G.palettes?.[0]||null;
-        document.getElementById('gN').textContent=G.note||'';
-        show('p3r');
-      }catch(e){err('eG',e.message);show('p2r');steps(2);}
-    }
-
-    /* ── Color utilities ── */
-    function hexToRgb(hex){ return [parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),parseInt(hex.slice(5,7),16)]; }
-    function rgbToHex(r,g,b){ return '#'+[r,g,b].map(v=>Math.min(255,Math.max(0,Math.round(v))).toString(16).padStart(2,'0')).join(''); }
-
-    /* ── Seeded random ── */
-    function hashStr(s){ let h=0; for(let i=0;i<s.length;i++) h=((h<<5)-h+s.charCodeAt(i))|0; return h; }
-    function mulberry32(seed){
-      return function(){ seed|=0; seed=(seed+0x6D2B79F5)|0; let t=Math.imul(seed^(seed>>>15),1|seed); t=(t+Math.imul(t^(t>>>7),61|t))^t; return((t^(t>>>14))>>>0)/4294967296; };
-    }
-
-    /* ── Pattern generation ── */
-    function snap(v,grid){ return Math.round(v/grid)*grid; }
-
-    function genPattern(seed, palette){
+    /* ── Pattern: diverse shapes ── */
+    function genPattern(seed, colors){
       const rand=mulberry32(seed);
+      const [base,a1,a2]=colors;
       const shapes=[];
-      const [base, a1, a2]=palette;
 
-      // Structured zones: left, right, corners — avoid center safe zone (610-1890)
+      // Pick 1-2 shape types for this cover
+      const allTypes=['rect','triangle','circle','diamond'];
+      const primary=allTypes[Math.floor(rand()*allTypes.length)];
+      const secondary=allTypes[Math.floor(rand()*allTypes.length)];
+
       const zones=[
-        {x:0,y:0,w:650,h:850},      // left
-        {x:1850,y:0,w:650,h:850},    // right
-        {x:0,y:0,w:800,h:300},       // top-left
-        {x:1700,y:0,w:800,h:300},    // top-right
-        {x:0,y:550,w:800,h:300},     // bottom-left
-        {x:1700,y:550,w:800,h:300},  // bottom-right
-        {x:500,y:600,w:600,h:250},   // bottom-center-left
-        {x:1400,y:600,w:600,h:250},  // bottom-center-right
+        {x:-100,y:0,w:700,h:850},
+        {x:1900,y:0,w:700,h:850},
+        {x:0,y:-50,w:800,h:350},
+        {x:1700,y:-50,w:800,h:350},
+        {x:0,y:550,w:800,h:350},
+        {x:1700,y:550,w:800,h:350},
+        {x:500,y:550,w:500,h:300},
+        {x:1500,y:550,w:500,h:300},
       ];
 
-      // Place 5-8 intentional shapes
-      const N=5+Math.floor(rand()*4);
-      const usedZones=[];
-
+      const N=5+Math.floor(rand()*3);
+      const used=[];
       for(let i=0;i<N;i++){
         let zi=Math.floor(rand()*zones.length);
-        while(usedZones.includes(zi) && usedZones.length<zones.length) zi=(zi+1)%zones.length;
-        usedZones.push(zi);
+        while(used.includes(zi)&&used.length<zones.length)zi=(zi+1)%zones.length;
+        used.push(zi);
         const z=zones[zi];
-
-        const sw=snap(150+rand()*350, 50);
-        const sh=snap(150+rand()*350, 50);
-        const sx=snap(z.x+rand()*(z.w-sw*0.5), 50);
-        const sy=snap(z.y+rand()*(z.h-sh*0.5), 50);
-
-        const colors=[base,a1,a2];
-        const color=colors[Math.floor(rand()*colors.length)];
-        const opacity=+(0.55+rand()*0.45).toFixed(2);
-
-        shapes.push({x:sx, y:sy, w:sw, h:sh, color, opacity});
+        const sw=snap(200+rand()*400,50);
+        const sh=snap(200+rand()*400,50);
+        const sx=snap(z.x+rand()*(z.w-sw*.3),50);
+        const sy=snap(z.y+rand()*(z.h-sh*.3),50);
+        const type=rand()<.7?primary:secondary;
+        const color=[base,a1,a2][Math.floor(rand()*3)];
+        shapes.push({x:sx,y:sy,w:sw,h:sh,type,color,opacity:+(0.6+rand()*0.4).toFixed(2)});
       }
 
-      // Add 2-3 small accent shapes for visual rhythm
-      const accN=2+Math.floor(rand()*2);
-      for(let i=0;i<accN;i++){
-        const sw=snap(50+rand()*150, 50);
-        const sh=snap(50+rand()*150, 50);
-        const sx=rand()<0.5 ? snap(rand()*500, 50) : snap(2000+rand()*500, 50);
-        const sy=snap(rand()*850, 50);
-        const color=rand()<0.5 ? a1 : a2;
-        shapes.push({x:sx, y:sy, w:sw, h:sh, color, opacity:+(0.7+rand()*0.3).toFixed(2)});
+      // 2-3 small accent shapes
+      for(let i=0;i<2+Math.floor(rand()*2);i++){
+        const sw=snap(80+rand()*200,50);
+        const sh=snap(80+rand()*200,50);
+        const sx=rand()<.5?snap(rand()*500,50):snap(2000+rand()*500,50);
+        const sy=snap(rand()*850,50);
+        const type=rand()<.5?primary:secondary;
+        shapes.push({x:sx,y:sy,w:sw,h:sh,type,color:rand()<.5?a1:a2,opacity:+(0.7+rand()*0.3).toFixed(2)});
       }
-
       return shapes;
     }
 
-    /* ── Text wrapping ── */
-    function wrapText(ctx, text, maxWidth){
-      const paragraphs=text.split('\n');
-      const lines=[];
-      for(const para of paragraphs){
-        if(!para.trim()){ lines.push(''); continue; }
-        const words=para.split(/\s+/).filter(w=>w);
-        let cur=words[0]||'';
-        for(let i=1;i<words.length;i++){
-          const test=cur+' '+words[i];
-          if(ctx.measureText(test).width>maxWidth){ lines.push(cur); cur=words[i]; }
-          else cur=test;
-        }
-        if(cur) lines.push(cur);
+    function drawShape(ctx,s){
+      ctx.globalAlpha=s.opacity;ctx.fillStyle=s.color;
+      switch(s.type){
+        case'rect':ctx.fillRect(s.x,s.y,s.w,s.h);break;
+        case'triangle':ctx.beginPath();ctx.moveTo(s.x+s.w/2,s.y);ctx.lineTo(s.x+s.w,s.y+s.h);ctx.lineTo(s.x,s.y+s.h);ctx.closePath();ctx.fill();break;
+        case'circle':ctx.beginPath();ctx.arc(s.x+s.w/2,s.y+s.h/2,Math.min(s.w,s.h)/2,0,Math.PI*2);ctx.fill();break;
+        case'diamond':ctx.beginPath();ctx.moveTo(s.x+s.w/2,s.y);ctx.lineTo(s.x+s.w,s.y+s.h/2);ctx.lineTo(s.x+s.w/2,s.y+s.h);ctx.lineTo(s.x,s.y+s.h/2);ctx.closePath();ctx.fill();break;
       }
-      return lines;
     }
 
-    function forceTwoLines(ctx, text, maxWidth){
-      let lines=wrapText(ctx, text, maxWidth);
-      if(lines.length===1){
-        const t=lines[0];
-        const words=t.split(/\s+/);
-        if(words.length>=2){
-          const mid=Math.ceil(words.length/2);
-          lines=[words.slice(0,mid).join(' '), words.slice(mid).join(' ')];
-        }else{
-          const mid=Math.ceil(t.length/2);
-          lines=[t.slice(0,mid), t.slice(mid)];
-        }
+    function shapeToSVG(s){
+      const o=`opacity="${s.opacity}"`;const f=`fill="${s.color}"`;
+      switch(s.type){
+        case'rect':return`<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" ${f} ${o}/>`;
+        case'triangle':return`<polygon points="${s.x+s.w/2},${s.y} ${s.x+s.w},${s.y+s.h} ${s.x},${s.y+s.h}" ${f} ${o}/>`;
+        case'circle':{const r=Math.min(s.w,s.h)/2;return`<circle cx="${s.x+s.w/2}" cy="${s.y+s.h/2}" r="${r}" ${f} ${o}/>`;}
+        case'diamond':return`<polygon points="${s.x+s.w/2},${s.y} ${s.x+s.w},${s.y+s.h/2} ${s.x+s.w/2},${s.y+s.h} ${s.x},${s.y+s.h/2}" ${f} ${o}/>`;
+        default:return`<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" ${f} ${o}/>`;
       }
-      if(lines.length>2){
-        lines=[lines[0], lines.slice(1).join(' ')];
-      }
-      return lines;
     }
+
+    /* ── Text ── */
+    function wrapText(ctx,text,maxW){const ps=text.split('\n'),lines=[];for(const p of ps){if(!p.trim()){lines.push('');continue;}const ws=p.split(/\s+/).filter(w=>w);let c=ws[0]||'';for(let i=1;i<ws.length;i++){const t=c+' '+ws[i];if(ctx.measureText(t).width>maxW){lines.push(c);c=ws[i];}else c=t;}if(c)lines.push(c);}return lines;}
+
+    function forceTwoLines(ctx,text,maxW){let lines=wrapText(ctx,text,maxW);if(lines.length===1){const ws=lines[0].split(/\s+/);if(ws.length>=2){const m=Math.ceil(ws.length/2);lines=[ws.slice(0,m).join(' '),ws.slice(m).join(' ')];}else{const m=Math.ceil(text.length/2);lines=[text.slice(0,m),text.slice(m)];}}if(lines.length>2)lines=[lines[0],lines.slice(1).join(' ')];return lines;}
 
     function buildCoverTitle(){
-      if(S.label && S.headline) return S.label+'\n'+S.headline;
-      return S.label||S.headline||'';
+      const l1=S.line1||S.label||'';
+      const l2=S.line2||S.headline||'';
+      if(l1&&l2) return l1+'\n'+l2;
+      return l1||l2;
     }
 
-    /* ── Step 4: Preview render ── */
-    async function runStep4(){
-      steps(4); show('p4l');
-      try{
-        await document.fonts.load('800 144px "WATCHA Sans OTF"');
-        renderCover();
-        show('p4r');
-      }catch(e){ err('eG',e.message); go(3,1); }
+    /* ── Step 3: Preview ── */
+    async function runStep3(){
+      steps(3);show('p3l');
+      try{await document.fonts.load('800 144px "WATCHA Sans OTF"');renderCover();show('p3r');}
+      catch(e){err('eG',e.message);go(2,1);}
     }
 
     function renderCover(){
-      const canvas=document.getElementById('cvs');
-      const ctx=canvas.getContext('2d');
-      canvas.width=2500; canvas.height=850;
+      const canvas=document.getElementById('cvs'),ctx=canvas.getContext('2d');
+      canvas.width=2500;canvas.height=850;
+      const pal=selectedPalette||{base:'#333',accent1:'#555',accent2:'#777'};
+      const colors=[pal.base,pal.accent1,pal.accent2];
 
-      const pal=selectedPalette||G.palettes?.[0]||{base:'#333333',accent1:'#555555',accent2:'#777777'};
-      const colors=[pal.base, pal.accent1, pal.accent2];
-
-      // Background
-      ctx.fillStyle=pal.base;
-      ctx.fillRect(0,0,2500,850);
-
-      // Pattern
-      const seed=hashStr((S.label||'')+(S.headline||'')+patternSeed);
-      currentPattern=genPattern(seed, colors);
-      for(const r of currentPattern){
-        ctx.globalAlpha=r.opacity;
-        ctx.fillStyle=r.color;
-        ctx.fillRect(r.x, r.y, r.w, r.h);
-      }
+      ctx.fillStyle=pal.base;ctx.fillRect(0,0,2500,850);
+      const seed=hashStr((S.line1||S.label||'')+(S.line2||S.headline||'')+patternSeed);
+      currentPattern=genPattern(seed,colors);
+      for(const s of currentPattern) drawShape(ctx,s);
       ctx.globalAlpha=1;
 
-      // Text
-      ctx.fillStyle='#FFFFFF';
-      ctx.textAlign='center';
-      ctx.textBaseline='top';
-
-      // Category label
+      ctx.fillStyle='#FFFFFF';ctx.textAlign='center';ctx.textBaseline='top';
       ctx.font='800 80px "WATCHA Sans OTF"';
-      if('letterSpacing' in ctx) ctx.letterSpacing='-1px';
-      ctx.fillText(CAT_LABELS[cat], 1250, 165);
+      if('letterSpacing' in ctx)ctx.letterSpacing='-1px';
+      ctx.fillText(CAT_LABELS[cat],1250,165);
 
-      // Title
       ctx.font='800 144px "WATCHA Sans OTF"';
-      if('letterSpacing' in ctx) ctx.letterSpacing='-4px';
+      if('letterSpacing' in ctx)ctx.letterSpacing='-4px';
       const title=buildCoverTitle();
-      if(title.includes('\n')){
-        currentTitleLines=title.split('\n').slice(0,2);
-      }else{
-        currentTitleLines=forceTwoLines(ctx, title, 1197);
-      }
-      const titleStartY=305;
-      currentTitleLines.forEach((line,i)=>{
-        ctx.fillText(line, 1250, titleStartY+i*175);
-      });
-
-      if('letterSpacing' in ctx) ctx.letterSpacing='0px';
+      currentTitleLines=title.includes('\n')?title.split('\n').slice(0,2):forceTwoLines(ctx,title,1197);
+      currentTitleLines.forEach((line,i)=>ctx.fillText(line,1250,305+i*175));
+      if('letterSpacing' in ctx)ctx.letterSpacing='0px';
     }
 
-    function regenerate(){
-      patternSeed++;
-      renderCover();
-    }
+    function regenerate(){patternSeed++;renderCover();}
 
     /* ── Downloads ── */
-    function dlPNG(){
-      const canvas=document.getElementById('cvs');
-      const link=document.createElement('a');
-      link.download=(S.label||'cover').replace(/\s+/g,'_')+'.png';
-      link.href=canvas.toDataURL('image/png');
-      link.click();
-    }
+    function dlPNG(){const c=document.getElementById('cvs'),a=document.createElement('a');a.download=((S.line1||S.label||'cover')+'_'+(S.line2||S.headline||'')).replace(/\s+/g,'_')+'.png';a.href=c.toDataURL('image/png');a.click();}
 
-    function escXml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
+    function escX(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
     function dlSVG(){
-      const pal=selectedPalette||G.palettes?.[0]||{base:'#333333',accent1:'#555555',accent2:'#777777'};
-      let s=`<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2500 850" width="2500" height="850">\n`;
-      s+=`<rect width="2500" height="850" fill="${pal.base}"/>\n`;
-
-      for(const r of currentPattern){
-        s+=`<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="${r.color}" opacity="${r.opacity}"/>\n`;
-      }
-
-      // Category label
-      s+=`<text x="1250" y="215" text-anchor="middle" font-family="WATCHA Sans OTF" font-weight="800" font-size="80" letter-spacing="-1" fill="#FFFFFF">${escXml(CAT_LABELS[cat])}</text>\n`;
-
-      // Title
-      currentTitleLines.forEach((line,i)=>{
-        const y=420+i*175;
-        s+=`<text x="1250" y="${y}" text-anchor="middle" font-family="WATCHA Sans OTF" font-weight="800" font-size="144" letter-spacing="-4" fill="#FFFFFF">${escXml(line)}</text>\n`;
-      });
-
+      const pal=selectedPalette||{base:'#333',accent1:'#555',accent2:'#777'};
+      let s=`<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2500 850" width="2500" height="850">\n<rect width="2500" height="850" fill="${pal.base}"/>\n`;
+      for(const sh of currentPattern)s+=shapeToSVG(sh)+'\n';
+      s+=`<text x="1250" y="215" text-anchor="middle" font-family="WATCHA Sans OTF" font-weight="800" font-size="80" letter-spacing="-1" fill="#FFFFFF">${escX(CAT_LABELS[cat])}</text>\n`;
+      currentTitleLines.forEach((line,i)=>{s+=`<text x="1250" y="${420+i*175}" text-anchor="middle" font-family="WATCHA Sans OTF" font-weight="800" font-size="144" letter-spacing="-4" fill="#FFFFFF">${escX(line)}</text>\n`;});
       s+='</svg>';
-
-      const blob=new Blob([s],{type:'image/svg+xml'});
-      const link=document.createElement('a');
-      link.download=(S.label||'cover').replace(/\s+/g,'_')+'.svg';
-      link.href=URL.createObjectURL(blob);
-      link.click();
-      URL.revokeObjectURL(link.href);
+      const a=document.createElement('a');a.download=((S.line1||S.label||'cover')+'_'+(S.line2||S.headline||'')).replace(/\s+/g,'_')+'.svg';a.href=URL.createObjectURL(new Blob([s],{type:'image/svg+xml'}));a.click();
     }
 
-    /* ── Footer actions ── */
     function copyAll(btn){
       const pal=selectedPalette||{};
-      const t=[
-        `[Structure]`,`label: ${S.label||''}`,`headline: ${S.headline||''}`,`sub: ${S.sub||''}`,
-        '',`[Strategy]`,`language: ${T.primary_language||''}`,`emphasis: ${T.emphasis||''}`,`tone: ${T.tone||''}`,`readability: ${T.readability||''}`,`visual weight: ${T.visual_weight||''}`,`reasoning: ${T.reasoning||''}`,
-        '',`[Palette]`,`name: ${pal.name||''}`,`base: ${pal.base||''}`,`accent1: ${pal.accent1||''}`,`accent2: ${pal.accent2||''}`,
-        '',`[Cover Title]`,`category: ${CAT_LABELS[cat]}`,`title: ${currentTitleLines.join(' / ')}`
-      ].join('\n');
+      const t=[`[Cover]`,`line1: ${S.line1||S.label||''}`,`line2: ${S.line2||S.headline||''}`,`category: ${CAT_LABELS[cat]}`,``,`[Palette]`,`name: ${pal.name||''}`,`base: ${pal.base||''}`,`accent1: ${pal.accent1||''}`,`accent2: ${pal.accent2||''}`].join('\n');
       navigator.clipboard.writeText(t);
       const o=btn.innerHTML;btn.textContent='✓ Copied';btn.classList.add('copied');
       setTimeout(()=>{btn.innerHTML=o;btn.classList.remove('copied');},1500);
     }
 
-    function resetAll(){
-      S={};T={};G={};cat='branding';selectedPalette=null;patternSeed=0;currentPattern=[];currentTitleLines=[];
-      steps(1);show('p1');
-      document.getElementById('inputText').value='';document.getElementById('inputUrl').value='';
-      document.querySelectorAll('.cat-btn').forEach((b,i)=>{b.classList.toggle('active',i===0);});
-    }
+    function resetAll(){S={};T={};G={};cat='branding';selectedPalette=null;patternSeed=0;currentPattern=[];currentTitleLines=[];steps(1);show('p1');document.getElementById('inputText').value='';document.getElementById('inputUrl').value='';document.querySelectorAll('.cat-btn').forEach((b,i)=>b.classList.toggle('active',i===0));}
 
-    /* ── Keyboard shortcuts ── */
     const ta=document.getElementById('inputText');
     ta.addEventListener('input',()=>{ta.style.height='auto';ta.style.height=Math.max(140,ta.scrollHeight)+'px';});
     document.getElementById('inputText').addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter')runStep1();});
