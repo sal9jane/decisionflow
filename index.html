@@ -211,23 +211,44 @@
     function mulberry32(seed){return function(){seed|=0;seed=(seed+0x6D2B79F5)|0;let t=Math.imul(seed^(seed>>>15),1|seed);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};}
     function snap(v,g){return Math.round(v/g)*g;}
 
-    /* ── Pattern ── */
+    /* ── Pattern: full-coverage 3-layer composition ── */
     function genPattern(seed,colors){
       const rand=mulberry32(seed);
       const[base,a1,a2]=colors;
+      const pal=a1===a2?[base,a1]:[base,a1,a2];
       const shapes=[];
-      const allTypes=['rect','triangle','circle','diamond'];
-      const primary=allTypes[Math.floor(rand()*allTypes.length)];
-      const secondary=allTypes[Math.floor(rand()*allTypes.length)];
-      const zones=[{x:-100,y:0,w:700,h:850},{x:1900,y:0,w:700,h:850},{x:0,y:-50,w:800,h:350},{x:1700,y:-50,w:800,h:350},{x:0,y:550,w:800,h:350},{x:1700,y:550,w:800,h:350},{x:500,y:550,w:500,h:300},{x:1500,y:550,w:500,h:300}];
-      const N=5+Math.floor(rand()*3),used=[];
-      for(let i=0;i<N;i++){let zi=Math.floor(rand()*zones.length);while(used.includes(zi)&&used.length<zones.length)zi=(zi+1)%zones.length;used.push(zi);const z=zones[zi];
-        const sw=snap(200+rand()*400,50),sh=snap(200+rand()*400,50);
-        const sx=snap(z.x+rand()*(z.w-sw*.3),50),sy=snap(z.y+rand()*(z.h-sh*.3),50);
-        shapes.push({x:sx,y:sy,w:sw,h:sh,type:rand()<.7?primary:secondary,color:[base,a1,a2][Math.floor(rand()*3)],opacity:+(0.6+rand()*0.4).toFixed(2)});}
-      for(let i=0;i<2+Math.floor(rand()*2);i++){const sw=snap(80+rand()*200,50),sh=snap(80+rand()*200,50);
-        const sx=rand()<.5?snap(rand()*500,50):snap(2000+rand()*500,50),sy=snap(rand()*850,50);
-        shapes.push({x:sx,y:sy,w:sw,h:sh,type:rand()<.5?primary:secondary,color:rand()<.5?a1:a2,opacity:+(0.7+rand()*0.3).toFixed(2)});}
+      const W=2500,H=850;
+
+      // LAYER 1: Vertical columns — full canvas coverage, no gaps
+      const nCols=3+Math.floor(rand()*3);
+      let cx=-30;
+      for(let i=0;i<nCols;i++){
+        const cw=(W+60)/nCols+(rand()-.5)*200;
+        shapes.push({type:'rect',x:Math.round(cx),y:-30,w:Math.round(cw+30),h:H+60,color:pal[i%pal.length],opacity:1});
+        cx+=cw;
+      }
+
+      // LAYER 2: Large compositional shapes — intersect columns, create depth
+      const types=['triangle','circle','diamond','rect'];
+      const mainType=types[Math.floor(rand()*types.length)];
+      const n2=7+Math.floor(rand()*5);
+      for(let i=0;i<n2;i++){
+        const sw=300+rand()*800,sh=250+rand()*600;
+        const sx=-sw*.3+rand()*(W+sw*.3);
+        const sy=-sh*.3+rand()*(H+sh*.3);
+        shapes.push({type:rand()<.6?mainType:types[Math.floor(rand()*types.length)],
+          x:Math.round(sx),y:Math.round(sy),w:Math.round(sw),h:Math.round(sh),
+          color:pal[Math.floor(rand()*pal.length)],opacity:1});
+      }
+
+      // LAYER 3: Small accent shapes — visual rhythm
+      const n3=3+Math.floor(rand()*4);
+      for(let i=0;i<n3;i++){
+        const sw=snap(50+rand()*180,50),sh=snap(50+rand()*180,50);
+        shapes.push({type:rand()<.5?'circle':'diamond',
+          x:snap(rand()*W,50),y:snap(rand()*H,50),w:sw,h:sh,
+          color:pal[Math.floor(rand()*pal.length)],opacity:1});
+      }
       return shapes;
     }
 
