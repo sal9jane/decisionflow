@@ -88,12 +88,15 @@
 
     <!-- STEP 1: Input -->
     <div class="panel active" id="p1">
+      <h2 style="font-family:var(--serif);font-size:28px;font-weight:900;letter-spacing:-.02em;margin-bottom:48px;line-height:1.4">텍스트를 디자인 구조로</h2>
       <div class="section-title">Category</div>
       <div class="category-row">
         <button class="cat-btn active" onclick="switchCat(this,'branding')">Branding Notes</button>
         <button class="cat-btn" onclick="switchCat(this,'service')">Service &amp; Tech</button>
         <button class="cat-btn" onclick="switchCat(this,'communication')">Brand Communication</button>
+        <button class="cat-btn" onclick="switchCat(this,'custom')">Custom</button>
       </div>
+      <div id="customCatWrap" style="display:none;margin-bottom:32px"><input type="text" id="customCatInput" class="url-input" placeholder="카테고리를 입력하세요 (예: Data Engineering)"></div>
       <div class="section-title" style="margin-top:32px">Input</div>
       <div class="toggle-row">
         <button class="toggle-btn active" onclick="switchTab('text')">Text</button>
@@ -160,11 +163,14 @@
       service:'WATCHA는 OTT/콘텐츠 플랫폼 브랜드입니다. 이 글은 서비스&테크(Service & Tech) 카테고리입니다.',
       communication:'WATCHA는 OTT/콘텐츠 플랫폼 브랜드입니다. 이 글은 브랜드 커뮤니케이션(Brand Communication) 카테고리입니다.'
     };
+    let customCatLabel='';
+    function getCatLabel(){if(cat==='custom')return customCatLabel||'Custom';return getCatLabel();}
+    function getCatContext(){if(cat==='custom')return `WATCHA는 OTT/콘텐츠 플랫폼 브랜드입니다. 이 글은 "${getCatLabel()}" 카테고리입니다.`;return getCatContext();}
 
     let tab='text',cat='branding',S={},T={},G={};
     let selectedPalette=null,patternSeed=0,currentPattern=[],currentTitleLines=[];
 
-    function switchCat(btn,c){cat=c;document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+    function switchCat(btn,c){cat=c;document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('customCatWrap').style.display=c==='custom'?'block':'none';}
     function switchTab(t){tab=t;document.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.toggle-btn[onclick="switchTab('${t}')"]`).classList.add('active');document.getElementById('textInput').style.display=t==='text'?'block':'none';document.getElementById('urlInput').style.display=t==='url'?'block':'none';}
     function show(id){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');}
     function steps(n){['s1','s2'].forEach((id,i)=>{const el=document.getElementById(id);el.className='step-tab';if(i+1===n)el.classList.add('active');else if(i+1<n)el.classList.add('done');});document.getElementById('navStep').innerHTML=`<strong>0${n}</strong> / 02`;}
@@ -181,7 +187,13 @@
       if(!text){err('e1','텍스트를 입력해주세요.');return;}
       document.getElementById('ld1').classList.add('visible');document.getElementById('e1').classList.remove('visible');document.getElementById('convertBtn').disabled=true;
       try{
-        S=await ai(`${CAT_CONTEXT[cat]}\n\nDistill input into blog cover title for WATCHA's tech blog. The cover has 2 lines of text.\n\nOutput ONLY JSON:\n{"line1":"cover title LINE 1 — key concept, 1-4 words (Korean or English, whichever reads best for this content)","line2":"cover title LINE 2 — supporting detail, 1-4 words (Korean or English)","sub":"one sentence description for reference"}\n\nExamples:\n{"line1":"WATCHA PEDIA","line2":"취향 아카이브","sub":"취향을 기록하고 발견하는 서비스"}\n{"line1":"데이터 마이그레이션","line2":"시스템 구축","sub":"멀티 클라우드 환경에서의 데이터 이관"}\n{"line1":"Kubernetes-native","line2":"로그 플랫폼","sub":"클라우드 네이티브 로깅 시스템 구축기"}\n\nIMPORTANT: 절대 한자(漢字)를 사용하지 마세요. 한글 또는 영문만 사용.`,text);
+        // Translate custom category to English if needed
+        if(cat==='custom'){
+          const raw=document.getElementById('customCatInput').value.trim()||'Custom';
+          const tr=await ai('Translate the following category name to concise English (2-3 words max, Title Case). If already in English, clean it up. Output ONLY JSON:\n{"en":"English Category Name"}',raw);
+          customCatLabel=tr.en||raw;
+        }
+        S=await ai(`${getCatContext()}\n\nDistill input into blog cover title for WATCHA's tech blog. The cover has 2 lines of text.\n\nOutput ONLY JSON:\n{"line1":"cover title LINE 1 — key concept, 1-4 words (Korean or English, whichever reads best for this content)","line2":"cover title LINE 2 — supporting detail, 1-4 words (Korean or English)","sub":"one sentence description for reference"}\n\nExamples:\n{"line1":"WATCHA PEDIA","line2":"취향 아카이브","sub":"취향을 기록하고 발견하는 서비스"}\n{"line1":"데이터 마이그레이션","line2":"시스템 구축","sub":"멀티 클라우드 환경에서의 데이터 이관"}\n{"line1":"Kubernetes-native","line2":"로그 플랫폼","sub":"클라우드 네이티브 로깅 시스템 구축기"}\n\nIMPORTANT: 절대 한자(漢字)를 사용하지 마세요. 한글 또는 영문만 사용.`,text);
         document.getElementById('rL').textContent=S.line1||'';
         document.getElementById('rH').textContent=S.line2||'';
         document.getElementById('rS').textContent=S.sub||'';
@@ -195,10 +207,10 @@
       steps(2);show('p2l');
       try{
         await document.fonts.load('800 144px "WATCHA Sans OTF"');
-        T=await ai(`${CAT_CONTEXT[cat]}\n\nExpression strategist for WATCHA blog cover. Choose the best template and visual strategy.\n\nTEMPLATE OPTIONS:\n- grid-mosaic: structured grid composition. Best for systematic/architectural topics (시스템, 아키텍처, 데이터, 플랫폼, 인프라)\n- diagonal-cross: dynamic crossing diagonals. Best for change/transformation topics (전환, 마이그레이션, 도전, 성장, 변화)\n- column-arc: vertical columns with curves. Best for brand/emotional topics (브랜드, 커뮤니케이션, 디자인, 경험, 문화)\n\nOutput ONLY JSON:\n{"primary_language":"ko/en/mix","emphasis":"line1/line2","tone":"information/emotion/blend","visual_weight":"text-centric/graphic-support/graphic-dominant","template":"grid-mosaic/diagonal-cross/column-arc","template_reason":"1 sentence in Korean explaining why this template fits"}`,JSON.stringify(S));
+        T=await ai(`${getCatContext()}\n\nExpression strategist for WATCHA blog cover. Choose the best template and visual strategy.\n\nTEMPLATE OPTIONS:\n- grid-mosaic: structured grid composition. Best for systematic/architectural topics (시스템, 아키텍처, 데이터, 플랫폼, 인프라)\n- diagonal-cross: dynamic crossing diagonals. Best for change/transformation topics (전환, 마이그레이션, 도전, 성장, 변화)\n- column-arc: vertical columns with curves. Best for brand/emotional topics (브랜드, 커뮤니케이션, 디자인, 경험, 문화)\n\nOutput ONLY JSON:\n{"primary_language":"ko/en/mix","emphasis":"line1/line2","tone":"information/emotion/blend","visual_weight":"text-centric/graphic-support/graphic-dominant","template":"grid-mosaic/diagonal-cross/column-arc","template_reason":"1 sentence in Korean explaining why this template fits"}`,JSON.stringify(S));
         const validIds = TEMPLATE_REGISTRY.map(t => t.id);
         selectedTemplate = validIds.includes(T.template) ? T.template : 'grid-mosaic';
-        G=await ai(`${CAT_CONTEXT[cat]}\n\nColor palette advisor for WATCHA blog cover (2500×850px). Suggest 3 color palettes.\n\nCOLOR STRUCTURE (MANDATORY for every palette):\n- base + accent1 = SAME COLOR FAMILY, different brightness/saturation (e.g., dark navy #1B2E4B + medium blue #3A6B9F, or deep burgundy #3D1A2A + muted rose #6B3A4D)\n- accent2 = POINT COLOR that contrasts with the base family (e.g., if base family is blue, point could be coral #FF6B6B or gold #D4A843)\n\nThe point color (accent2) occupies small accent areas only. Base and accent1 cover most of the canvas.\n\nEXAMPLES of good palettes:\n- Deep forest #1A3D2E + sage #3D6B52 + warm coral #E8785A\n- Dark navy #1B2E4B + steel blue #4A7B9F + amber #D4943A\n- Charcoal violet #2D2640 + dusty purple #5B4A7A + mint #5AC4A8\n- Deep burgundy #3D1A2A + mauve #7A4A5E + turquoise #4AC4B8\n\nRULES:\n- base MUST be dark enough for white text (HSL lightness ≤ 30%)\n- accent1 is the SAME HUE as base, just lighter or more saturated (lightness 30-50%)\n- accent2 is a CONTRASTING hue — at least 60° away on the color wheel\n- No muddy or washed-out colors\n- Consider the article topic for color mood\n\nOutput ONLY JSON:\n{"palettes":[{"name":"Korean 2-3 words","base":"#hex","accent1":"#hex","accent2":"#hex"},{"name":"...","base":"#hex","accent1":"#hex","accent2":"#hex"},{"name":"...","base":"#hex","accent1":"#hex","accent2":"#hex"}],"note":"1-2 Korean sentences"}`,JSON.stringify({structure:S,strategy:T}));
+        G=await ai(`${getCatContext()}\n\nColor palette advisor for WATCHA blog cover (2500×850px). Suggest 3 color palettes.\n\nCOLOR STRUCTURE (MANDATORY for every palette):\n- base + accent1 = SAME COLOR FAMILY, different brightness/saturation (e.g., dark navy #1B2E4B + medium blue #3A6B9F, or deep burgundy #3D1A2A + muted rose #6B3A4D)\n- accent2 = POINT COLOR that contrasts with the base family (e.g., if base family is blue, point could be coral #FF6B6B or gold #D4A843)\n\nThe point color (accent2) occupies small accent areas only. Base and accent1 cover most of the canvas.\n\nEXAMPLES of good palettes:\n- Deep forest #1A3D2E + sage #3D6B52 + warm coral #E8785A\n- Dark navy #1B2E4B + steel blue #4A7B9F + amber #D4943A\n- Charcoal violet #2D2640 + dusty purple #5B4A7A + mint #5AC4A8\n- Deep burgundy #3D1A2A + mauve #7A4A5E + turquoise #4AC4B8\n\nRULES:\n- base MUST be dark enough for white text (HSL lightness ≤ 30%)\n- accent1 is the SAME HUE as base, just lighter or more saturated (lightness 30-50%)\n- accent2 is a CONTRASTING hue — at least 60° away on the color wheel\n- No muddy or washed-out colors\n- Consider the article topic for color mood\n\nOutput ONLY JSON:\n{"palettes":[{"name":"Korean 2-3 words","base":"#hex","accent1":"#hex","accent2":"#hex"},{"name":"...","base":"#hex","accent1":"#hex","accent2":"#hex"},{"name":"...","base":"#hex","accent1":"#hex","accent2":"#hex"}],"note":"1-2 Korean sentences"}`,JSON.stringify({structure:S,strategy:T}));
 
         buildPaletteBar();
         buildTemplateBar();
@@ -518,7 +530,7 @@
       ctx.globalAlpha = 1;
       ctx.fillStyle = '#FFFFFF'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
       ctx.font = '800 80px "WATCHA Sans OTF"'; if ('letterSpacing' in ctx) ctx.letterSpacing = '-1px';
-      ctx.fillText(CAT_LABELS[cat], 1250, 165);
+      ctx.fillText(getCatLabel(), 1250, 165);
       ctx.font = '800 144px "WATCHA Sans OTF"'; if ('letterSpacing' in ctx) ctx.letterSpacing = '-4px';
       const title = buildCoverTitle();
       currentTitleLines = title.includes('\n') ? title.split('\n').slice(0, 2) : forceTwoLines(ctx, title, 1197);
@@ -536,7 +548,7 @@
       let s=`<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2500 850" width="2500" height="850">\n<rect width="2500" height="850" fill="${pal.base}"/>\n`;
       const colors=[pal.base,pal.accent1,pal.accent2];
       for(const sh of currentPattern)s+=shapeToSVG(sh,colors)+'\n';
-      s+=`<text x="1250" y="215" text-anchor="middle" font-family="WATCHA Sans OTF" font-weight="800" font-size="80" letter-spacing="-1" fill="#FFFFFF">${escX(CAT_LABELS[cat])}</text>\n`;
+      s+=`<text x="1250" y="215" text-anchor="middle" font-family="WATCHA Sans OTF" font-weight="800" font-size="80" letter-spacing="-1" fill="#FFFFFF">${escX(getCatLabel())}</text>\n`;
       currentTitleLines.forEach((line,i)=>{s+=`<text x="1250" y="${420+i*175}" text-anchor="middle" font-family="WATCHA Sans OTF" font-weight="800" font-size="144" letter-spacing="-4" fill="#FFFFFF">${escX(line)}</text>\n`;});
       s+='</svg>';const a=document.createElement('a');a.download=((S.line1||'cover')+'_'+(S.line2||'')).replace(/\s+/g,'_')+'.svg';a.href=URL.createObjectURL(new Blob([s],{type:'image/svg+xml'}));a.click();
     }
@@ -544,12 +556,12 @@
     function copyAll(btn){
       const pal=selectedPalette||{};
       const tmplName=(TEMPLATE_REGISTRY.find(t=>t.id===selectedTemplate)||{}).name||'';
-      const t=[`[Cover]`,`line1: ${S.line1||''}`,`line2: ${S.line2||''}`,`category: ${CAT_LABELS[cat]}`,`template: ${tmplName}`,``,`[Palette]`,`name: ${pal.name||''}`,`base: ${pal.base||''}`,`accent1: ${pal.accent1||''}`,`accent2: ${pal.accent2||''}`].join('\n');
+      const t=[`[Cover]`,`line1: ${S.line1||''}`,`line2: ${S.line2||''}`,`category: ${getCatLabel()}`,`template: ${tmplName}`,``,`[Palette]`,`name: ${pal.name||''}`,`base: ${pal.base||''}`,`accent1: ${pal.accent1||''}`,`accent2: ${pal.accent2||''}`].join('\n');
       navigator.clipboard.writeText(t);const o=btn.innerHTML;btn.textContent='✓ Copied';btn.classList.add('copied');
       setTimeout(()=>{btn.innerHTML=o;btn.classList.remove('copied');},1500);
     }
 
-    function resetAll(){S={};T={};G={};cat='branding';selectedPalette=null;selectedTemplate=null;patternSeed=0;currentPattern=[];currentTitleLines=[];steps(1);show('p1');document.getElementById('inputText').value='';document.getElementById('inputUrl').value='';document.querySelectorAll('.cat-btn').forEach((b,i)=>b.classList.toggle('active',i===0));}
+    function resetAll(){S={};T={};G={};cat='branding';customCatLabel='';selectedPalette=null;selectedTemplate=null;patternSeed=0;currentPattern=[];currentTitleLines=[];steps(1);show('p1');document.getElementById('inputText').value='';document.getElementById('inputUrl').value='';document.getElementById('customCatInput').value='';document.getElementById('customCatWrap').style.display='none';document.querySelectorAll('.cat-btn').forEach((b,i)=>b.classList.toggle('active',i===0));}
 
     const ta=document.getElementById('inputText');
     ta.addEventListener('input',()=>{ta.style.height='auto';ta.style.height=Math.max(140,ta.scrollHeight)+'px';});
