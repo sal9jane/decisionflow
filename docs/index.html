@@ -165,8 +165,8 @@
       communication:'WATCHA는 OTT/콘텐츠 플랫폼 브랜드입니다. 이 글은 브랜드 커뮤니케이션(Brand Communication) 카테고리입니다.'
     };
     let customCatLabel='';
-    function getCatLabel(){if(cat==='custom')return customCatLabel||'Custom';return getCatLabel();}
-    function getCatContext(){if(cat==='custom')return `WATCHA는 OTT/콘텐츠 플랫폼 브랜드입니다. 이 글은 "${getCatLabel()}" 카테고리입니다.`;return getCatContext();}
+    function getCatLabel(){if(cat==='custom')return customCatLabel||'Custom';return CAT_LABELS[cat];}
+    function getCatContext(){if(cat==='custom')return `WATCHA는 OTT/콘텐츠 플랫폼 브랜드입니다. 이 글은 "${getCatLabel()}" 카테고리입니다.`;return CAT_CONTEXT[cat];}
 
     let tab='text',cat='branding',S={},T={},G={};
     let selectedPalette=null,patternSeed=0,currentPattern=[],currentTitleLines=[];
