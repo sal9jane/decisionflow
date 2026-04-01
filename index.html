@@ -181,7 +181,7 @@
       if(!text){err('e1','텍스트를 입력해주세요.');return;}
       document.getElementById('ld1').classList.add('visible');document.getElementById('e1').classList.remove('visible');document.getElementById('convertBtn').disabled=true;
       try{
-        S=await ai(`${CAT_CONTEXT[cat]}\n\nDistill input into blog cover title for WATCHA's tech blog. The cover has 2 lines of text.\n\nOutput ONLY JSON:\n{"line1":"cover title LINE 1 — key concept, 1-4 words (Korean or English, whichever reads best for this content)","line2":"cover title LINE 2 — supporting detail, 1-4 words (Korean or English)","sub":"one sentence description for reference"}\n\nExamples:\n{"line1":"WATCHA PEDIA","line2":"취향 아카이브","sub":"취향을 기록하고 발견하는 서비스"}\n{"line1":"데이터 마이그레이션","line2":"시스템 구축","sub":"멀티 클라우드 환경에서의 데이터 이관"}\n{"line1":"Kubernetes-native","line2":"로그 플랫폼","sub":"클라우드 네이티브 로깅 시스템 구축기"}`,text);
+        S=await ai(`${CAT_CONTEXT[cat]}\n\nDistill input into blog cover title for WATCHA's tech blog. The cover has 2 lines of text.\n\nOutput ONLY JSON:\n{"line1":"cover title LINE 1 — key concept, 1-4 words (Korean or English, whichever reads best for this content)","line2":"cover title LINE 2 — supporting detail, 1-4 words (Korean or English)","sub":"one sentence description for reference"}\n\nExamples:\n{"line1":"WATCHA PEDIA","line2":"취향 아카이브","sub":"취향을 기록하고 발견하는 서비스"}\n{"line1":"데이터 마이그레이션","line2":"시스템 구축","sub":"멀티 클라우드 환경에서의 데이터 이관"}\n{"line1":"Kubernetes-native","line2":"로그 플랫폼","sub":"클라우드 네이티브 로깅 시스템 구축기"}\n\nIMPORTANT: 절대 한자(漢字)를 사용하지 마세요. 한글 또는 영문만 사용.`,text);
         document.getElementById('rL').textContent=S.line1||'';
         document.getElementById('rH').textContent=S.line2||'';
         document.getElementById('rS').textContent=S.sub||'';
