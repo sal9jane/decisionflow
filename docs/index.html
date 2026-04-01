@@ -83,7 +83,7 @@
   <div class="main">
     <div class="step-bar">
       <span class="step-tab active" id="s1">Structure</span>
-      <span class="step-tab" id="s2">Preview</span>
+      <span class="step-tab" id="s2">Visual</span>
     </div>
 
     <!-- STEP 1: Input -->
@@ -111,20 +111,21 @@
 
     <!-- STEP 1: Result -->
     <div class="panel" id="p1r">
+      <h2 style="font-family:var(--serif);font-size:28px;font-weight:900;letter-spacing:-.02em;margin-bottom:48px;line-height:1.4">커버에 들어갈 구조</h2>
       <div class="result-structure">
         <div class="r-label" id="rL"></div>
         <div class="r-headline" id="rH"></div>
         <div class="r-sub" id="rS"></div>
       </div>
-      <div class="action-row"><button class="btn-outline" onclick="go(1)">Back</button><button class="btn" onclick="runPreview()">Preview →</button></div>
+      <div class="action-row"><button class="btn-outline" onclick="go(1)">Back</button><button class="btn" onclick="runPreview()">Visual →</button></div>
     </div>
 
-    <!-- STEP 2: Preview Loading -->
-    <div class="panel" id="p2l"><div class="loading visible"><span class="loading-text">Generating Preview</span></div></div>
+    <!-- STEP 2: Visual Loading -->
+    <div class="panel" id="p2l"><div class="loading visible"><span class="loading-text">Generating Visual</span></div></div>
 
-    <!-- STEP 2: Preview Result -->
+    <!-- STEP 2: Visual Result -->
     <div class="panel" id="p2r">
-      <div class="section-title">Cover Preview</div>
+      <h2 style="font-family:var(--serif);font-size:28px;font-weight:900;letter-spacing:-.02em;margin-bottom:48px;line-height:1.4">구조를 시각 언어로</h2>
       <div class="preview-wrap"><canvas id="cvs"></canvas></div>
       <div class="section-title" style="margin-top:24px">Template</div>
       <div class="tmpl-bar" id="tmplBar"></div>
