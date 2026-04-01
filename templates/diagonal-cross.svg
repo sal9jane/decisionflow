@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2500 850" width="2500" height="850">
+  <!-- Background zones -->
+  <rect id="base" x="0" y="0" width="800" height="850" fill="#333"/>
+  <rect id="accent1" x="800" y="0" width="900" height="850" fill="#555"/>
+  <rect id="base-2" x="1700" y="0" width="800" height="850" fill="#333"/>
+  <!-- Crossing diagonals -->
+  <polygon id="accent2" points="0,850 600,0 900,0 300,850" fill="#777"/>
+  <polygon id="accent2-2" points="1600,0 2500,850 2200,850 1300,0" fill="#777"/>
+  <!-- Center accent blocks -->
+  <rect id="accent1-2" x="900" y="200" width="700" height="450" fill="#555"/>
+  <rect id="accent2-3" x="200" y="0" width="350" height="300" fill="#777"/>
+  <rect id="accent1-3" x="1950" y="550" width="400" height="300" fill="#555"/>
+</svg>
