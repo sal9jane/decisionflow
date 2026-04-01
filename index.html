@@ -327,24 +327,52 @@
         const W=2500,H=850,shapes=[];
         const slots=['base','accent1','accent2'];
         shapes.push({type:'rect',x:0,y:0,w:W,h:H,slot:'base'});
-        // 3-5 large arcs from edges and center
+
+        // Build 3-5 ellipses with tracked centers for intersection detection
+        const arcs=[];
         const nArcs=3+Math.floor(rand()*3);
-        const positions=[
-          ()=>({cx:Math.round(-200+rand()*400),cy:Math.round(rand()*H)}), // left edge
-          ()=>({cx:Math.round(W-400+rand()*600),cy:Math.round(rand()*H)}), // right edge
-          ()=>({cx:Math.round(W*0.3+rand()*W*0.4),cy:Math.round(H+100+rand()*300)}), // bottom
-          ()=>({cx:Math.round(W*0.3+rand()*W*0.4),cy:Math.round(-100-rand()*300)}), // top
-          ()=>({cx:Math.round(rand()*W),cy:Math.round(rand()*H)}) // free
+        const sources=[
+          ()=>({cx:Math.round(-100+rand()*300),cy:Math.round(H*0.2+rand()*H*0.6)}),
+          ()=>({cx:Math.round(W-300+rand()*400),cy:Math.round(H*0.2+rand()*H*0.6)}),
+          ()=>({cx:Math.round(W*0.25+rand()*W*0.5),cy:Math.round(H+50+rand()*250)}),
+          ()=>({cx:Math.round(W*0.25+rand()*W*0.5),cy:Math.round(-50-rand()*250)}),
+          ()=>({cx:Math.round(W*0.15+rand()*W*0.7),cy:Math.round(H*0.1+rand()*H*0.8)})
         ];
         for(let i=0;i<nArcs;i++){
-          const pos=positions[i%positions.length]();
-          const rx=Math.round(500+rand()*700);const ry=Math.round(300+rand()*500);
-          shapes.push({type:'ellipse',x:pos.cx-rx,y:pos.cy-ry,w:rx*2,h:ry*2,slot:slots[(i+1)%3]});
+          const pos=sources[i%sources.length]();
+          const rx=Math.round(450+rand()*650);const ry=Math.round(280+rand()*450);
+          const slot=slots[(i+1)%3];
+          arcs.push({cx:pos.cx,cy:pos.cy,rx,ry,slot});
+          shapes.push({type:'ellipse',x:pos.cx-rx,y:pos.cy-ry,w:rx*2,h:ry*2,slot});
         }
-        // 1-3 small circle accents
-        const nC=1+Math.floor(rand()*3);
+
+        // Detect overlapping pairs → add intersection shapes
+        for(let i=0;i<arcs.length;i++){
+          for(let j=i+1;j<arcs.length;j++){
+            const a=arcs[i],b=arcs[j];
+            const dx=(a.cx-b.cx)/(a.rx+b.rx)*2;
+            const dy=(a.cy-b.cy)/(a.ry+b.ry)*2;
+            const dist=Math.sqrt(dx*dx+dy*dy);
+            if(dist<1.2){ // ellipses overlap
+              // Intersection zone: smaller ellipse at midpoint
+              const mx=Math.round((a.cx+b.cx)/2);
+              const my=Math.round((a.cy+b.cy)/2);
+              const irx=Math.round(Math.min(a.rx,b.rx)*(1-dist*0.5));
+              const iry=Math.round(Math.min(a.ry,b.ry)*(1-dist*0.5));
+              if(irx>80&&iry>60){
+                // Pick a slot that's different from both parent shapes
+                const usedSlots=[a.slot,b.slot];
+                const availSlot=slots.find(s=>!usedSlots.includes(s))||slots[2];
+                shapes.push({type:'ellipse',x:mx-irx,y:my-iry,w:irx*2,h:iry*2,slot:availSlot});
+              }
+            }
+          }
+        }
+
+        // 1-2 small circle accents
+        const nC=1+Math.floor(rand()*2);
         for(let i=0;i<nC;i++){
-          const r=Math.round(100+rand()*200);
+          const r=Math.round(80+rand()*180);
           const cx=Math.round(200+rand()*(W-400));const cy=Math.round(100+rand()*(H-200));
           shapes.push({type:'circle',x:cx-r,y:cy-r,w:r*2,h:r*2,slot:slots[Math.floor(rand()*3)]});
         }
