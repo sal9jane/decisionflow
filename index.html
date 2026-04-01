@@ -55,6 +55,10 @@
     .pal-chip { display:flex; gap:3px; padding:8px 12px; border:2px solid var(--gray-6); cursor:pointer; transition:all .12s; align-items:center; }
     .pal-chip:hover { border-color:var(--gray-3); }
     .pal-chip.active { border-color:var(--black); }
+    .tmpl-bar { display:flex; gap:6px; margin-bottom:16px; }
+    .tmpl-chip { padding:10px 16px; border:2px solid var(--gray-6); cursor:pointer; transition:all .12s; font-size:12px; font-weight:500; color:var(--gray-3); font-family:var(--sans); background:var(--white); }
+    .tmpl-chip:hover { border-color:var(--gray-3); }
+    .tmpl-chip.active { border-color:var(--black); color:var(--black); }
     .pal-sq { width:20px; height:20px; border:1px solid rgba(0,0,0,.06); }
     .pal-label { font-size:12px; font-weight:500; color:var(--gray-3); margin-left:8px; white-space:nowrap; }
     .color-edit { display:flex; gap:12px; align-items:center; margin-bottom:24px; }
@@ -119,6 +123,9 @@
     <div class="panel" id="p2r">
       <div class="section-title">Cover Preview</div>
       <div class="preview-wrap"><canvas id="cvs"></canvas></div>
+      <div class="section-title" style="margin-top:24px">Template</div>
+      <div class="tmpl-bar" id="tmplBar"></div>
+      <div class="section-title" style="margin-top:16px">Palette</div>
       <div class="palette-bar" id="palBar"></div>
       <div class="color-edit" id="colorEdit">
         <div class="color-edit-group"><label>Base</label><input type="color" id="cBase" onchange="onColorEdit()"></div>
@@ -193,6 +200,7 @@
         G=await ai(`${CAT_CONTEXT[cat]}\n\nColor palette advisor for WATCHA blog cover (2500×850px). Suggest 3 color palettes.\n\nCOLOR STRATEGY — choose the best approach per palette:\n- Duo-tone: 2 bold colors (e.g., dark charcoal #3D3D3D + vivid teal #00BFA5)\n- Monochromatic: 2-3 tones of same hue (e.g., #D72660 + #FF387A + #FF7EB3)\n- Analogous: neighboring hues (e.g., navy #1B2E4B + blue #4A80C4 + sky #7CB5F0)\n\nRULES:\n- BASE color MUST be dark enough for white text (max brightness ~40%). Examples: #1B2E4B, #2D2D3D, #3D1A1A, #1A3D2E — NEVER light green, light blue, yellow, etc.\n- Accent colors can be brighter/vivid but they appear only in graphic areas, not behind text\n- No muddy or desaturated colors\n- Consider the article topic for color mood\n- ALWAYS provide 3 DISTINCT colors (base, accent1, accent2 must all be different) — this is critical for graphic composition quality\n\nOutput ONLY JSON:\n{"palettes":[{"name":"Korean 2-3 words","base":"#hex","accent1":"#hex","accent2":"#hex"},{"name":"...","base":"#hex","accent1":"#hex","accent2":"#hex"},{"name":"...","base":"#hex","accent1":"#hex","accent2":"#hex"}],"note":"1-2 Korean sentences"}`,JSON.stringify({structure:S,strategy:T}));
 
         buildPaletteBar();
+        buildTemplateBar();
         selectedPalette=G.palettes?.[0]||{base:'#333',accent1:'#555',accent2:'#777'};
         syncColorInputs();
         renderCover();
@@ -212,6 +220,22 @@
           chip.classList.add('active');
           selectedPalette=p;
           syncColorInputs();
+          renderCover();
+        };
+        bar.appendChild(chip);
+      });
+    }
+
+    function buildTemplateBar() {
+      const bar = document.getElementById('tmplBar'); bar.innerHTML = '';
+      TEMPLATE_REGISTRY.forEach(t => {
+        const chip = document.createElement('div');
+        chip.className = 'tmpl-chip' + (t.id === selectedTemplate ? ' active' : '');
+        chip.textContent = t.name;
+        chip.onclick = () => {
+          document.querySelectorAll('.tmpl-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          selectedTemplate = t.id;
           renderCover();
         };
         bar.appendChild(chip);
@@ -460,12 +484,13 @@
 
     function copyAll(btn){
       const pal=selectedPalette||{};
-      const t=[`[Cover]`,`line1: ${S.line1||''}`,`line2: ${S.line2||''}`,`category: ${CAT_LABELS[cat]}`,``,`[Palette]`,`name: ${pal.name||''}`,`base: ${pal.base||''}`,`accent1: ${pal.accent1||''}`,`accent2: ${pal.accent2||''}`].join('\n');
+      const tmplName=(TEMPLATE_REGISTRY.find(t=>t.id===selectedTemplate)||{}).name||'';
+      const t=[`[Cover]`,`line1: ${S.line1||''}`,`line2: ${S.line2||''}`,`category: ${CAT_LABELS[cat]}`,`template: ${tmplName}`,``,`[Palette]`,`name: ${pal.name||''}`,`base: ${pal.base||''}`,`accent1: ${pal.accent1||''}`,`accent2: ${pal.accent2||''}`].join('\n');
       navigator.clipboard.writeText(t);const o=btn.innerHTML;btn.textContent='✓ Copied';btn.classList.add('copied');
       setTimeout(()=>{btn.innerHTML=o;btn.classList.remove('copied');},1500);
     }
 
-    function resetAll(){S={};T={};G={};cat='branding';selectedPalette=null;patternSeed=0;currentPattern=[];currentTitleLines=[];steps(1);show('p1');document.getElementById('inputText').value='';document.getElementById('inputUrl').value='';document.querySelectorAll('.cat-btn').forEach((b,i)=>b.classList.toggle('active',i===0));}
+    function resetAll(){S={};T={};G={};cat='branding';selectedPalette=null;selectedTemplate=null;patternSeed=0;currentPattern=[];currentTitleLines=[];steps(1);show('p1');document.getElementById('inputText').value='';document.getElementById('inputUrl').value='';document.querySelectorAll('.cat-btn').forEach((b,i)=>b.classList.toggle('active',i===0));}
 
     const ta=document.getElementById('inputText');
     ta.addEventListener('input',()=>{ta.style.height='auto';ta.style.height=Math.max(140,ta.scrollHeight)+'px';});
