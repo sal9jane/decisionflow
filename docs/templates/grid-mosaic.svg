@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2500 850" width="2500" height="850">
+  <!-- Left column: dense small blocks -->
+  <rect id="base" x="0" y="0" width="700" height="500" fill="#333"/>
+  <rect id="accent1" x="0" y="500" width="700" height="350" fill="#555"/>
+  <rect id="accent2" x="100" y="350" width="400" height="300" fill="#777"/>
+  <!-- Center column: large blocks for text backdrop -->
+  <rect id="base-2" x="700" y="0" width="1100" height="850" fill="#333"/>
+  <rect id="accent1-2" x="850" y="550" width="350" height="300" fill="#555"/>
+  <rect id="accent2-2" x="1200" y="100" width="300" height="250" fill="#777"/>
+  <!-- Right column: dense small blocks -->
+  <rect id="accent1-3" x="1800" y="0" width="700" height="450" fill="#555"/>
+  <rect id="base-3" x="1800" y="450" width="700" height="400" fill="#333"/>
+  <rect id="accent2-3" x="1900" y="300" width="500" height="350" fill="#777"/>
+  <rect id="accent1-4" x="2100" y="0" width="400" height="250" fill="#555"/>
+</svg>

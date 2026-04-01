@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2500 850" width="2500" height="850">
+  <!-- Vertical columns -->
+  <rect id="base" x="0" y="0" width="625" height="850" fill="#333"/>
+  <rect id="accent1" x="625" y="0" width="625" height="850" fill="#555"/>
+  <rect id="accent2" x="1250" y="0" width="625" height="850" fill="#777"/>
+  <rect id="base-2" x="1875" y="0" width="625" height="850" fill="#333"/>
+  <!-- Arc overlay -->
+  <ellipse id="accent1-2" cx="1250" cy="850" rx="900" ry="500" fill="#555"/>
+  <!-- Small accents -->
+  <rect id="accent2-2" x="0" y="600" width="400" height="250" fill="#777"/>
+  <rect id="accent1-3" x="2100" y="0" width="400" height="300" fill="#555"/>
+  <rect id="base-3" x="500" y="0" width="300" height="200" fill="#333"/>
+</svg>
