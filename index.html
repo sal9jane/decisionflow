@@ -302,6 +302,52 @@
       await Promise.all(TEMPLATE_REGISTRY.map(t => loadTemplate(t.id)));
     }
 
+    function applyVariation(shapes, seed) {
+      const rand = mulberry32(seed);
+      const W = 2500;
+
+      // Slot shuffle: rotate slot assignments (3 permutations)
+      const slotMaps = [
+        { base: 'base', accent1: 'accent1', accent2: 'accent2' },
+        { base: 'accent1', accent1: 'accent2', accent2: 'base' },
+        { base: 'accent2', accent1: 'base', accent2: 'accent1' }
+      ];
+      const slotMap = slotMaps[Math.floor(rand() * 3)];
+
+      // Mirror: 50% chance to flip horizontally
+      const mirror = rand() > 0.5;
+
+      return shapes.map(s => {
+        const varied = { ...s, slot: slotMap[s.slot] || s.slot };
+
+        // Scale jitter: ±5%
+        const jitter = 0.95 + rand() * 0.1;
+        if (varied.type === 'rect' || varied.type === 'circle' || varied.type === 'ellipse') {
+          const cx = varied.x + varied.w / 2, cy = varied.y + varied.h / 2;
+          const nw = varied.w * jitter, nh = varied.h * jitter;
+          varied.x = cx - nw / 2;
+          varied.y = cy - nh / 2;
+          varied.w = nw;
+          varied.h = nh;
+        }
+
+        // Mirror
+        if (mirror) {
+          if (varied.type === 'polygon' && varied.points) {
+            varied.points = varied.points.map(([px, py]) => [W - px, py]);
+            const xs = varied.points.map(p => p[0]);
+            varied.x = Math.min(...xs);
+          } else if (varied.type === 'path') {
+            varied.mirrorTransform = true;
+          } else {
+            varied.x = W - varied.x - varied.w;
+          }
+        }
+
+        return varied;
+      });
+    }
+
     /* ── Pattern: grid-cell composition with overlap accents ── */
     function genPattern(seed,colors){
       const rand=mulberry32(seed);
