@@ -348,79 +348,61 @@
       });
     }
 
-    /* ── Pattern: grid-cell composition with overlap accents ── */
-    function genPattern(seed,colors){
-      const rand=mulberry32(seed);
-      const[base,a1,a2]=colors;
-      const shapes=[];
-      const W=2500,H=850;
-      const pal=[base,a1,a2];
-
-      // Build column widths (3-4 columns)
-      const nC=3+Math.floor(rand()*2);
-      const colX=[0];
-      for(let i=1;i<nC;i++) colX.push(Math.round(W/nC*i+(rand()-.5)*W/nC*.5));
-      colX.push(W);
-
-      // Build row heights (2-3 rows)
-      const nR=2+Math.floor(rand()*2);
-      const rowY=[0];
-      for(let i=1;i<nR;i++) rowY.push(Math.round(H/nR*i+(rand()-.5)*H/nR*.4));
-      rowY.push(H);
-
-      // Assign colors to grid cells — no same-color neighbors
-      const grid=[];
-      for(let r=0;r<nR;r++){grid[r]=[];
-        for(let c=0;c<nC;c++){
-          const used=[];
-          if(r>0)used.push(grid[r-1][c]);
-          if(c>0)used.push(grid[r][c-1]);
-          const avail=pal.filter(p=>!used.includes(p));
-          grid[r][c]=avail.length?avail[Math.floor(rand()*avail.length)]:pal[Math.floor(rand()*pal.length)];
-        }
+    function drawShape(ctx, s, colors) {
+      const slotColors = { base: colors[0], accent1: colors[1], accent2: colors[2] };
+      ctx.globalAlpha = s.opacity || 1;
+      ctx.fillStyle = s.color || slotColors[s.slot] || colors[0];
+      switch (s.type) {
+        case 'rect':
+          ctx.fillRect(s.x, s.y, s.w, s.h);
+          break;
+        case 'circle':
+          ctx.beginPath();
+          ctx.arc(s.x + s.w / 2, s.y + s.h / 2, Math.min(s.w, s.h) / 2, 0, Math.PI * 2);
+          ctx.fill();
+          break;
+        case 'ellipse':
+          ctx.beginPath();
+          ctx.ellipse(s.x + s.w / 2, s.y + s.h / 2, s.w / 2, s.h / 2, 0, 0, Math.PI * 2);
+          ctx.fill();
+          break;
+        case 'polygon':
+          ctx.beginPath();
+          ctx.moveTo(s.points[0][0], s.points[0][1]);
+          for (let i = 1; i < s.points.length; i++) ctx.lineTo(s.points[i][0], s.points[i][1]);
+          ctx.closePath();
+          ctx.fill();
+          break;
+        case 'path':
+          const p = new Path2D(s.d);
+          if (s.mirrorTransform) { ctx.save(); ctx.translate(2500, 0); ctx.scale(-1, 1); ctx.fill(p); ctx.restore(); }
+          else ctx.fill(p);
+          break;
       }
-
-      // Draw grid cells
-      for(let r=0;r<nR;r++){
-        for(let c=0;c<nC;c++){
-          shapes.push({type:'rect',x:colX[c],y:rowY[r],w:colX[c+1]-colX[c],h:rowY[r+1]-rowY[r],color:grid[r][c],opacity:1});
-        }
-      }
-
-      // Overlay accents — 2-3 overlapping blocks for depth
-      const nAcc=2+Math.floor(rand()*2);
-      for(let i=0;i<nAcc;i++){
-        const c1=Math.floor(rand()*nC),r1=Math.floor(rand()*nR);
-        // Span 1-2 columns, 1-2 rows
-        const cSpan=Math.min(nC-c1, 1+Math.floor(rand()*2));
-        const rSpan=Math.min(nR-r1, 1+Math.floor(rand()*2));
-        const ax=colX[c1]+Math.round(rand()*(colX[c1+1]-colX[c1])*.3);
-        const ay=rowY[r1]+Math.round(rand()*(rowY[r1+1]-rowY[r1])*.3);
-        const aw=colX[c1+cSpan]-ax-Math.round(rand()*100);
-        const ah=rowY[r1+rSpan]-ay-Math.round(rand()*80);
-        if(aw>50&&ah>50){
-          let color;do{color=pal[Math.floor(rand()*3)];}while(color===grid[r1][c1]);
-          shapes.push({type:'rect',x:ax,y:ay,w:aw,h:ah,color,opacity:1});
-        }
-      }
-
-      return shapes;
+      ctx.globalAlpha = 1;
     }
 
-    function drawShape(ctx,s){ctx.globalAlpha=s.opacity;ctx.fillStyle=s.color;
-      switch(s.type){case'rect':ctx.fillRect(s.x,s.y,s.w,s.h);break;
-      case'triangle':ctx.beginPath();ctx.moveTo(s.x+s.w/2,s.y);ctx.lineTo(s.x+s.w,s.y+s.h);ctx.lineTo(s.x,s.y+s.h);ctx.closePath();ctx.fill();break;
-      case'circle':ctx.beginPath();ctx.arc(s.x+s.w/2,s.y+s.h/2,Math.min(s.w,s.h)/2,0,Math.PI*2);ctx.fill();break;
-      case'diamond':ctx.beginPath();ctx.moveTo(s.x+s.w/2,s.y);ctx.lineTo(s.x+s.w,s.y+s.h/2);ctx.lineTo(s.x+s.w/2,s.y+s.h);ctx.lineTo(s.x,s.y+s.h/2);ctx.closePath();ctx.fill();break;
-      case'polygon':ctx.beginPath();ctx.moveTo(s.points[0][0],s.points[0][1]);for(let i=1;i<s.points.length;i++)ctx.lineTo(s.points[i][0],s.points[i][1]);ctx.closePath();ctx.fill();break;}}
-
-    function shapeToSVG(s){const o=`opacity="${s.opacity}"`,f=`fill="${s.color}"`;
-      switch(s.type){case'rect':return`<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" ${f} ${o}/>`;
-      case'triangle':return`<polygon points="${s.x+s.w/2},${s.y} ${s.x+s.w},${s.y+s.h} ${s.x},${s.y+s.h}" ${f} ${o}/>`;
-      case'circle':{const r=Math.min(s.w,s.h)/2;return`<circle cx="${s.x+s.w/2}" cy="${s.y+s.h/2}" r="${r}" ${f} ${o}/>`;}
-      case'diamond':return`<polygon points="${s.x+s.w/2},${s.y} ${s.x+s.w},${s.y+s.h/2} ${s.x+s.w/2},${s.y+s.h} ${s.x},${s.y+s.h/2}" ${f} ${o}/>`;
-      case'polygon':return`<polygon points="${s.points.map(p=>p.join(',')).join(' ')}" ${f} ${o}/>`;
-      default:return`<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" ${f} ${o}/>`;}
+    function shapeToSVG(s, colors) {
+      const slotColors = { base: colors[0], accent1: colors[1], accent2: colors[2] };
+      const fill = s.color || slotColors[s.slot] || colors[0];
+      const o = s.opacity || 1;
+      switch (s.type) {
+        case 'rect':
+          return `<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" fill="${fill}" opacity="${o}"/>`;
+        case 'circle': {
+          const r = Math.min(s.w, s.h) / 2;
+          return `<circle cx="${s.x + s.w / 2}" cy="${s.y + s.h / 2}" r="${r}" fill="${fill}" opacity="${o}"/>`;
+        }
+        case 'ellipse':
+          return `<ellipse cx="${s.x + s.w / 2}" cy="${s.y + s.h / 2}" rx="${s.w / 2}" ry="${s.h / 2}" fill="${fill}" opacity="${o}"/>`;
+        case 'polygon':
+          return `<polygon points="${s.points.map(p => p.join(',')).join(' ')}" fill="${fill}" opacity="${o}"/>`;
+        case 'path':
+          if (s.mirrorTransform) return `<g transform="translate(2500,0) scale(-1,1)"><path d="${s.d}" fill="${fill}" opacity="${o}"/></g>`;
+          return `<path d="${s.d}" fill="${fill}" opacity="${o}"/>`;
+        default:
+          return `<rect x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" fill="${fill}" opacity="${o}"/>`;
+      }
     }
 
     /* ── Text ── */
@@ -429,24 +411,35 @@
     function buildCoverTitle(){const l1=S.line1||'',l2=S.line2||'';if(l1&&l2)return l1+'\n'+l2;return l1||l2;}
 
     /* ── Render ── */
-    function renderCover(){
-      const canvas=document.getElementById('cvs'),ctx=canvas.getContext('2d');
-      canvas.width=2500;canvas.height=850;
-      const pal=selectedPalette||{base:'#333',accent1:'#555',accent2:'#777'};
-      const colors=[pal.base,pal.accent1,pal.accent2];
-      ctx.fillStyle=pal.base;ctx.fillRect(0,0,2500,850);
-      const seed=hashStr((S.line1||'')+(S.line2||'')+patternSeed);
-      currentPattern=genPattern(seed,colors);
-      for(const s of currentPattern)drawShape(ctx,s);
-      ctx.globalAlpha=1;
-      ctx.fillStyle='#FFFFFF';ctx.textAlign='center';ctx.textBaseline='top';
-      ctx.font='800 80px "WATCHA Sans OTF"';if('letterSpacing' in ctx)ctx.letterSpacing='-1px';
-      ctx.fillText(CAT_LABELS[cat],1250,165);
-      ctx.font='800 144px "WATCHA Sans OTF"';if('letterSpacing' in ctx)ctx.letterSpacing='-4px';
-      const title=buildCoverTitle();
-      currentTitleLines=title.includes('\n')?title.split('\n').slice(0,2):forceTwoLines(ctx,title,1197);
-      currentTitleLines.forEach((line,i)=>ctx.fillText(line,1250,305+i*175));
-      if('letterSpacing' in ctx)ctx.letterSpacing='0px';
+    function renderCover() {
+      const canvas = document.getElementById('cvs'), ctx = canvas.getContext('2d');
+      canvas.width = 2500; canvas.height = 850;
+      const pal = selectedPalette || { base: '#333', accent1: '#555', accent2: '#777' };
+      const colors = [pal.base, pal.accent1, pal.accent2];
+
+      // Background fill
+      ctx.fillStyle = pal.base;
+      ctx.fillRect(0, 0, 2500, 850);
+
+      // Template shapes
+      const tmplId = selectedTemplate || 'grid-mosaic';
+      const tmpl = templateCache[tmplId];
+      if (tmpl) {
+        const seed = hashStr((S.line1 || '') + (S.line2 || '') + patternSeed);
+        currentPattern = applyVariation(tmpl.shapes, seed);
+        for (const s of currentPattern) drawShape(ctx, s, colors);
+      }
+
+      // Text rendering (unchanged)
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = '#FFFFFF'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.font = '800 80px "WATCHA Sans OTF"'; if ('letterSpacing' in ctx) ctx.letterSpacing = '-1px';
+      ctx.fillText(CAT_LABELS[cat], 1250, 165);
+      ctx.font = '800 144px "WATCHA Sans OTF"'; if ('letterSpacing' in ctx) ctx.letterSpacing = '-4px';
+      const title = buildCoverTitle();
+      currentTitleLines = title.includes('\n') ? title.split('\n').slice(0, 2) : forceTwoLines(ctx, title, 1197);
+      currentTitleLines.forEach((line, i) => ctx.fillText(line, 1250, 305 + i * 175));
+      if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
     }
 
     function regenerate(){patternSeed++;renderCover();}
@@ -457,7 +450,8 @@
     function dlSVG(){
       const pal=selectedPalette||{base:'#333',accent1:'#555',accent2:'#777'};
       let s=`<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2500 850" width="2500" height="850">\n<rect width="2500" height="850" fill="${pal.base}"/>\n`;
-      for(const sh of currentPattern)s+=shapeToSVG(sh)+'\n';
+      const colors=[pal.base,pal.accent1,pal.accent2];
+      for(const sh of currentPattern)s+=shapeToSVG(sh,colors)+'\n';
       s+=`<text x="1250" y="215" text-anchor="middle" font-family="WATCHA Sans OTF" font-weight="800" font-size="80" letter-spacing="-1" fill="#FFFFFF">${escX(CAT_LABELS[cat])}</text>\n`;
       currentTitleLines.forEach((line,i)=>{s+=`<text x="1250" y="${420+i*175}" text-anchor="middle" font-family="WATCHA Sans OTF" font-weight="800" font-size="144" letter-spacing="-4" fill="#FFFFFF">${escX(line)}</text>\n`;});
       s+='</svg>';const a=document.createElement('a');a.download=((S.line1||'cover')+'_'+(S.line2||'')).replace(/\s+/g,'_')+'.svg';a.href=URL.createObjectURL(new Blob([s],{type:'image/svg+xml'}));a.click();
@@ -476,6 +470,9 @@
     ta.addEventListener('input',()=>{ta.style.height='auto';ta.style.height=Math.max(140,ta.scrollHeight)+'px';});
     document.getElementById('inputText').addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter')runStep1();});
     document.getElementById('inputUrl').addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter')runStep1();});
+
+    // Load all templates on page init
+    loadAllTemplates().then(() => console.log('Templates ready'));
   </script>
 </body>
 </html>
