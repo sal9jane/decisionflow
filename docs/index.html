@@ -196,7 +196,8 @@
       try{
         await document.fonts.load('800 144px "WATCHA Sans OTF"');
         T=await ai(`${CAT_CONTEXT[cat]}\n\nExpression strategist for WATCHA blog cover. Choose the best template and visual strategy.\n\nTEMPLATE OPTIONS:\n- grid-mosaic: structured grid composition. Best for systematic/architectural topics (시스템, 아키텍처, 데이터, 플랫폼, 인프라)\n- diagonal-cross: dynamic crossing diagonals. Best for change/transformation topics (전환, 마이그레이션, 도전, 성장, 변화)\n- column-arc: vertical columns with curves. Best for brand/emotional topics (브랜드, 커뮤니케이션, 디자인, 경험, 문화)\n\nOutput ONLY JSON:\n{"primary_language":"ko/en/mix","emphasis":"line1/line2","tone":"information/emotion/blend","visual_weight":"text-centric/graphic-support/graphic-dominant","template":"grid-mosaic/diagonal-cross/column-arc","template_reason":"1 sentence in Korean explaining why this template fits"}`,JSON.stringify(S));
-        selectedTemplate = T.template || 'grid-mosaic';
+        const validIds = TEMPLATE_REGISTRY.map(t => t.id);
+        selectedTemplate = validIds.includes(T.template) ? T.template : 'grid-mosaic';
         G=await ai(`${CAT_CONTEXT[cat]}\n\nColor palette advisor for WATCHA blog cover (2500×850px). Suggest 3 color palettes.\n\nCOLOR STRATEGY — choose the best approach per palette:\n- Duo-tone: 2 bold colors (e.g., dark charcoal #3D3D3D + vivid teal #00BFA5)\n- Monochromatic: 2-3 tones of same hue (e.g., #D72660 + #FF387A + #FF7EB3)\n- Analogous: neighboring hues (e.g., navy #1B2E4B + blue #4A80C4 + sky #7CB5F0)\n\nRULES:\n- BASE color MUST be dark enough for white text (max brightness ~40%). Examples: #1B2E4B, #2D2D3D, #3D1A1A, #1A3D2E — NEVER light green, light blue, yellow, etc.\n- Accent colors can be brighter/vivid but they appear only in graphic areas, not behind text\n- No muddy or desaturated colors\n- Consider the article topic for color mood\n- ALWAYS provide 3 DISTINCT colors (base, accent1, accent2 must all be different) — this is critical for graphic composition quality\n\nOutput ONLY JSON:\n{"palettes":[{"name":"Korean 2-3 words","base":"#hex","accent1":"#hex","accent2":"#hex"},{"name":"...","base":"#hex","accent1":"#hex","accent2":"#hex"},{"name":"...","base":"#hex","accent1":"#hex","accent2":"#hex"}],"note":"1-2 Korean sentences"}`,JSON.stringify({structure:S,strategy:T}));
 
         buildPaletteBar();
@@ -264,7 +265,6 @@
     /* ── Utilities ── */
     function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=((h<<5)-h+s.charCodeAt(i))|0;return h;}
     function mulberry32(seed){return function(){seed|=0;seed=(seed+0x6D2B79F5)|0;let t=Math.imul(seed^(seed>>>15),1|seed);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};}
-    function snap(v,g){return Math.round(v/g)*g;}
 
     /* ── Template System ── */
     const TEMPLATE_REGISTRY = [
@@ -280,6 +280,8 @@
       const prefix = id.split('-')[0];
       if (prefix === 'accent1') return 'accent1';
       if (prefix === 'accent2') return 'accent2';
+      if (prefix === 'base') return 'base';
+      console.warn(`Unknown slot prefix "${prefix}" from id="${id}", defaulting to base`);
       return 'base';
     }
 
@@ -498,7 +500,7 @@
     document.getElementById('inputUrl').addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter')runStep1();});
 
     // Load all templates on page init
-    loadAllTemplates().then(() => console.log('Templates ready'));
+    loadAllTemplates().then(() => console.log('Templates ready')).catch(e => console.error('Template load failed:', e));
   </script>
 </body>
 </html>
