@@ -309,38 +309,40 @@
         const slots=['base','accent1','accent2'];
         shapes.push({type:'rect',x:0,y:0,w:W,h:H,slot:'base'});
 
-        // Direction A: top-left → bottom-right (positive drift)
-        const driftA=Math.round(400+rand()*500);
-        const nA=2+Math.floor(rand()*2);
+        // Direction A: top-left → bottom-right — 2 wide, spaced bands
+        const driftA=Math.round(500+rand()*400);
+        const nA=2;
+        const startA=Math.round(-300+rand()*400);
         for(let i=0;i<nA;i++){
-          const bw=Math.round(350+rand()*450);
-          const topX=Math.round(-100+rand()*(W*0.7));
-          const btmX=topX+driftA+Math.round(rand()*150-75);
+          const bw=Math.round(500+rand()*400);
+          const topX=startA+i*Math.round(W*0.4+rand()*200);
+          const btmX=topX+driftA;
           shapes.push({type:'polygon',
             points:[[topX,0],[topX+bw,0],[btmX+bw,H],[btmX,H]],
             x:Math.min(topX,btmX),y:0,
             w:Math.max(topX+bw,btmX+bw)-Math.min(topX,btmX),h:H,
-            slot:slots[i%2===0?1:0]});
+            slot:slots[i===0?1:0]});
         }
 
-        // Direction B: top-right → bottom-left (negative drift)
-        const driftB=Math.round(400+rand()*500);
-        const nB=2+Math.floor(rand()*2);
+        // Direction B: top-right → bottom-left — 2 wide, spaced bands
+        const driftB=Math.round(500+rand()*400);
+        const nB=2;
+        const startB=Math.round(W*0.3+rand()*400);
         for(let i=0;i<nB;i++){
-          const bw=Math.round(350+rand()*450);
-          const topX=Math.round(W*0.3+rand()*(W*0.7));
-          const btmX=topX-driftB+Math.round(rand()*150-75);
+          const bw=Math.round(500+rand()*400);
+          const topX=startB+i*Math.round(W*0.4+rand()*200);
+          const btmX=topX-driftB;
           shapes.push({type:'polygon',
             points:[[topX,0],[topX+bw,0],[btmX+bw,H],[btmX,H]],
             x:Math.min(topX,btmX),y:0,
             w:Math.max(topX+bw,btmX+bw)-Math.min(topX,btmX),h:H,
-            slot:slots[i%2===0?2:1]});
+            slot:slots[i===0?2:1]});
         }
 
-        // Intersection accent: a diamond/rhombus near the crossing zone
-        const crossX=Math.round(W*0.3+rand()*W*0.4);
-        const crossY=Math.round(H*0.2+rand()*H*0.6);
-        const dw=Math.round(200+rand()*300);const dh=Math.round(150+rand()*250);
+        // Large diamond at crossing zone
+        const crossX=Math.round(W*0.35+rand()*W*0.3);
+        const crossY=Math.round(H*0.3+rand()*H*0.4);
+        const dw=Math.round(300+rand()*250);const dh=Math.round(200+rand()*200);
         shapes.push({type:'polygon',
           points:[[crossX,crossY-dh],[crossX+dw,crossY],[crossX,crossY+dh],[crossX-dw,crossY]],
           x:crossX-dw,y:crossY-dh,w:dw*2,h:dh*2,
