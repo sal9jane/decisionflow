@@ -308,19 +308,44 @@
         const W=2500,H=850,shapes=[];
         const slots=['base','accent1','accent2'];
         shapes.push({type:'rect',x:0,y:0,w:W,h:H,slot:'base'});
-        // Generate 4-6 diagonal bands with varied offsets and widths
-        const nBands=4+Math.floor(rand()*3);
-        const drift=Math.round(400+rand()*600); // how much x shifts from top to bottom
-        for(let i=0;i<nBands;i++){
-          const bw=Math.round(300+rand()*500); // band width at top
-          const topX=Math.round(-200+rand()*(W+200));
-          const btmX=topX-drift+Math.round(rand()*200-100);
+
+        // Direction A: top-left → bottom-right (positive drift)
+        const driftA=Math.round(400+rand()*500);
+        const nA=2+Math.floor(rand()*2);
+        for(let i=0;i<nA;i++){
+          const bw=Math.round(350+rand()*450);
+          const topX=Math.round(-100+rand()*(W*0.7));
+          const btmX=topX+driftA+Math.round(rand()*150-75);
           shapes.push({type:'polygon',
             points:[[topX,0],[topX+bw,0],[btmX+bw,H],[btmX,H]],
             x:Math.min(topX,btmX),y:0,
             w:Math.max(topX+bw,btmX+bw)-Math.min(topX,btmX),h:H,
-            slot:slots[(i+Math.floor(rand()*2))%3]});
+            slot:slots[i%2===0?1:0]});
         }
+
+        // Direction B: top-right → bottom-left (negative drift)
+        const driftB=Math.round(400+rand()*500);
+        const nB=2+Math.floor(rand()*2);
+        for(let i=0;i<nB;i++){
+          const bw=Math.round(350+rand()*450);
+          const topX=Math.round(W*0.3+rand()*(W*0.7));
+          const btmX=topX-driftB+Math.round(rand()*150-75);
+          shapes.push({type:'polygon',
+            points:[[topX,0],[topX+bw,0],[btmX+bw,H],[btmX,H]],
+            x:Math.min(topX,btmX),y:0,
+            w:Math.max(topX+bw,btmX+bw)-Math.min(topX,btmX),h:H,
+            slot:slots[i%2===0?2:1]});
+        }
+
+        // Intersection accent: a diamond/rhombus near the crossing zone
+        const crossX=Math.round(W*0.3+rand()*W*0.4);
+        const crossY=Math.round(H*0.2+rand()*H*0.6);
+        const dw=Math.round(200+rand()*300);const dh=Math.round(150+rand()*250);
+        shapes.push({type:'polygon',
+          points:[[crossX,crossY-dh],[crossX+dw,crossY],[crossX,crossY+dh],[crossX-dw,crossY]],
+          x:crossX-dw,y:crossY-dh,w:dw*2,h:dh*2,
+          slot:slots[Math.floor(rand()*3)]});
+
         return shapes;
       },
       'column-arc': function(rand) {
